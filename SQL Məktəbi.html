@@ -1,0 +1,1051 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>SQL Məktəbi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: sabit sol mövzu siyahısı + oxu sütunu; hər tapşırıq redaktor, nəticə cədvəli və AI qutusundan ibarətdir. */
+:root{
+  --bg:#F2F5F7; --surface:#FFFFFF; --surface-2:#E8EEF2; --ink:#142330; --ink-2:#4B5C6A; --line:#D2DBE2;
+  --accent:#0B6E73; --accent-ink:#FFFFFF; --accent-soft:#D8EEEE;
+  --ok:#17703F; --ok-soft:#DCF2E3; --err:#B3261E; --err-soft:#FBE4E2; --warn:#8A5200; --warn-soft:#FBEFD8;
+  --code-bg:#F6F9FB; --kw:#0B5FA8; --str:#A4441A; --num:#7A3EB1;
+  --font:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1A24; --surface:#14232F; --surface-2:#1B2E3C; --ink:#E4ECF2; --ink-2:#9DB0BF; --line:#27404F;
+    --accent:#4FD0C8; --accent-ink:#06201F; --accent-soft:#12383A;
+    --ok:#5BD08A; --ok-soft:#14331F; --err:#FF8F86; --err-soft:#3C1B19; --warn:#F0B44C; --warn-soft:#3A2D12;
+    --code-bg:#0B1620; --kw:#7CC4FF; --str:#F2A679; --num:#C9A4FF; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1A24; --surface:#14232F; --surface-2:#1B2E3C; --ink:#E4ECF2; --ink-2:#9DB0BF; --line:#27404F;
+  --accent:#4FD0C8; --accent-ink:#06201F; --accent-soft:#12383A;
+  --ok:#5BD08A; --ok-soft:#14331F; --err:#FF8F86; --err-soft:#3C1B19; --warn:#F0B44C; --warn-soft:#3A2D12;
+  --code-bg:#0B1620; --kw:#7CC4FF; --str:#F2A679; --num:#C9A4FF; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.6;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+h1,h2,h3{line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.6rem,4vw,2.2rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:1.25rem;font-weight:600}
+h3{font-size:1.05rem;font-weight:600;margin-top:1.6rem}
+p{margin:.7rem 0}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.9em;background:var(--surface-2);padding:.1em .35em;border-radius:4px}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px;max-width:1280px;margin:0 auto}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);display:flex;align-items:center;gap:16px;height:60px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.15rem;text-decoration:none;color:var(--ink);letter-spacing:-.01em}
+.brand svg{width:28px;height:28px;color:var(--accent)}
+.menu-btn{display:none;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px;cursor:pointer;min-height:38px}
+.prog{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.bar{width:120px;height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+
+.shell{display:grid;grid-template-columns:280px minmax(0,1fr);gap:40px;align-items:start}
+#side{position:sticky;top:calc(60px + env(safe-area-inset-top,0px));max-height:calc(100vh - 60px - env(safe-area-inset-top,0px));overflow:auto;padding:20px 8px 24px 0}
+#side .lv{display:flex;align-items:center;gap:8px;font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-2);font-weight:600;margin:18px 0 6px}
+#side .lv:first-child{margin-top:0}
+.meter{display:inline-flex;gap:2px}.meter i{width:6px;height:10px;background:var(--line);border-radius:1px}.meter i.on{background:var(--accent)}
+#side a{display:flex;align-items:baseline;gap:10px;padding:7px 10px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:.93rem;line-height:1.35}
+#side a:hover{background:var(--surface-2)}
+#side a.cur{background:var(--accent-soft);font-weight:600}
+#side a .no{font-family:var(--mono);font-size:.78rem;color:var(--ink-2);min-width:1.6em;font-variant-numeric:tabular-nums}
+#side a .st{margin-left:auto;font-size:.75rem;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+#side a.full .st{color:var(--ok);font-weight:600}
+#scrim{display:none}
+main{padding:28px 0 0;min-width:0;max-width:860px}
+
+.crumb{display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--ink-2);margin-bottom:10px}
+.lead{color:var(--ink-2);font-size:1.05rem}
+.theory{margin-top:8px}
+.theory ul{padding-left:1.2rem;margin:.6rem 0}.theory li{margin:.25rem 0}
+.tip{background:var(--warn-soft);color:var(--ink);border-radius:8px;padding:10px 14px;font-size:.95rem}
+.tip b{color:var(--warn)}
+.info{width:100%;border-collapse:collapse;font-size:.92rem;margin:.8rem 0}
+.info th,.info td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.info th{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2)}
+.info td:first-child{font-family:var(--mono);white-space:nowrap}
+.tw{overflow-x:auto}
+
+.ex{margin:.9rem 0;border:1px solid var(--line);border-radius:10px;background:var(--code-bg);overflow:hidden}
+.ex pre{margin:0;padding:12px 14px;font:13.5px/1.65 var(--mono);overflow-x:auto;white-space:pre}
+.ex .mini{margin:0 12px 12px;}
+.ex-out{padding:0 12px 12px}
+.k{color:var(--kw);font-weight:500}.s{color:var(--str)}.n{color:var(--num)}.c{color:var(--ink-2);font-style:italic}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:500;font-size:.93rem;white-space:nowrap}
+.btn:hover{background:var(--surface-2)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.mini{min-height:32px;padding:0 12px;font-size:.85rem}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.5;cursor:default}
+[data-ai]{display:none}.ai-on [data-ai]{display:inline-flex}
+.aionly{display:none}.ai-on .aionly{display:block}
+
+details.schema{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:1.4rem 0}
+details.schema summary{padding:12px 16px;cursor:pointer;font-weight:600}
+.sch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;padding:0 16px 16px}
+.tbl{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--bg);min-width:0}
+.tbl button{all:unset;display:flex;width:100%;box-sizing:border-box;padding:8px 10px;cursor:pointer;font-family:var(--mono);font-weight:500;font-size:.88rem;background:var(--surface-2);justify-content:space-between;gap:8px}
+.tbl button small{font-family:var(--font);font-weight:400;color:var(--ink-2)}
+.tbl ul{list-style:none;margin:0;padding:6px 10px;font-family:var(--mono);font-size:.8rem}
+.tbl li{display:flex;gap:8px;padding:1px 0}.tbl li span{color:var(--ink-2);margin-left:auto}
+.tbl li b{font-weight:500;color:var(--accent)}
+.sch-notes{padding:0 16px 14px;font-size:.88rem;color:var(--ink-2)}
+.sch-prev{grid-column:1/-1}
+
+.tasks-h{margin-top:2.4rem;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.task{margin-top:18px;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:18px}
+.task-head{display:flex;align-items:center;gap:10px;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);font-weight:600}
+.badge{margin-left:auto;display:none;text-transform:none;letter-spacing:0;background:var(--ok-soft);color:var(--ok);border-radius:99px;padding:2px 10px;font-size:.8rem}
+.task.is-done .badge{display:inline-block}
+.task-text{margin:.5rem 0 .8rem;font-size:1.02rem}
+.editor{display:block;width:100%;min-height:96px;resize:vertical;background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:14px/1.65 var(--mono);tab-size:2;white-space:pre;overflow:auto}
+.editor:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+.kbd{margin-left:auto;font-size:.78rem;color:var(--ink-2)}
+.hint,.fb{margin-top:12px;border-radius:8px;padding:12px 14px;font-size:.95rem}
+.hint{background:var(--warn-soft)}
+.fb.ok{background:var(--ok-soft)}.fb.err{background:var(--err-soft)}.fb.info{background:var(--surface-2)}
+.fb strong{display:block;margin-bottom:2px}
+.fb.ok strong{color:var(--ok)}.fb.err strong{color:var(--err)}
+.fb code.raw{display:block;margin-top:8px;background:transparent;padding:0;color:var(--ink-2);white-space:pre-wrap;word-break:break-word}
+.sol{margin-top:12px}.sol .ex{margin:6px 0}
+.out{margin-top:6px}
+.tbl-wrap{overflow:auto;max-height:340px;border:1px solid var(--line);border-radius:8px;margin-top:12px;background:var(--surface)}
+table.grid{border-collapse:collapse;width:100%;font-size:.88rem;font-variant-numeric:tabular-nums}
+table.grid th{position:sticky;top:0;background:var(--surface-2);text-align:left;font-family:var(--mono);font-weight:500;font-size:.8rem;padding:7px 12px;white-space:nowrap;border-bottom:1px solid var(--line)}
+table.grid td{padding:6px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.grid tr:last-child td{border-bottom:0}
+table.grid td.rn,table.grid th.rn{color:var(--ink-2);font-family:var(--mono);font-size:.76rem;text-align:right;width:1%}
+table.grid td.num{text-align:right;font-family:var(--mono)}
+table.grid td.null{color:var(--ink-2);font-style:italic;font-size:.82rem}
+.rcount{font-size:.8rem;color:var(--ink-2);margin:6px 2px 0}
+
+.ai-box{margin-top:12px;border:1px solid var(--accent);border-radius:10px;background:var(--surface);overflow:hidden}
+.ai-head{background:var(--accent-soft);padding:8px 14px;font-weight:600;font-size:.88rem}
+.ai-log{padding:6px 14px;display:flex;flex-direction:column;gap:10px}
+.ai-msg{font-size:.95rem;padding:8px 0}
+.ai-msg.me{align-self:flex-end;background:var(--surface-2);border-radius:10px;padding:6px 12px;max-width:85%}
+.ai-msg pre{background:var(--code-bg);padding:8px 10px;border-radius:6px;overflow-x:auto;font:13px/1.55 var(--mono);margin:6px 0}
+.ai-form{display:flex;gap:8px;padding:10px 14px 14px;border-top:1px solid var(--line)}
+.ai-form input{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:0 12px;min-height:38px;background:var(--bg)}
+.dots::after{content:"…";animation:bl 1s steps(3) infinite}
+@keyframes bl{50%{opacity:.3}}
+.lesson-ask{margin-top:2rem;border:1px dashed var(--line);border-radius:12px;padding:16px}
+.lesson-ask h3{margin:0 0 4px;font-size:1rem}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:2rem;flex-wrap:wrap}
+.pager a{text-decoration:none}
+
+.hero p{max-width:60ch}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:1.6rem 0}
+.steps div{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface);font-size:.95rem}
+.steps b{display:block;margin-bottom:4px}
+.lvls{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:1rem}
+.lvl{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:16px}
+.lvl h3{margin:0 0 8px;display:flex;align-items:center;gap:8px;font-size:1rem}
+.lvl a{display:block;padding:4px 0;color:var(--ink);text-decoration:none;font-size:.93rem}
+.lvl a:hover{color:var(--accent)}
+.lvl a span{font-family:var(--mono);color:var(--ink-2);font-size:.78rem;margin-right:6px}
+.play-ed{min-height:160px}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .menu-btn{display:inline-flex;align-items:center}
+  #side{position:fixed;z-index:40;top:0;bottom:0;left:0;width:min(86vw,320px);max-height:none;background:var(--bg);padding:calc(16px + env(safe-area-inset-top,0px)) 16px 24px max(16px,env(safe-area-inset-left,0px));border-right:1px solid var(--line);transform:translateX(-102%);transition:transform .2s}
+  body.drawer #side{transform:none}
+  body.drawer #scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:35}
+  .bar{width:70px}
+  .kbd{display:none}
+}
+@media (max-width:480px){ .prog span.t{display:none} .btn{padding:0 12px} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Mövzular menyusu">Mövzular</button>
+    <a class="brand" href="#">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><ellipse cx="16" cy="7" rx="10" ry="4"/><path d="M6 7v9c0 2.2 4.5 4 10 4s10-1.8 10-4V7"/><path d="M6 16v9c0 2.2 4.5 4 10 4s10-1.8 10-4v-9"/></svg>
+      SQL Məktəbi
+    </a>
+    <div class="prog"><span class="t" id="progText"></span><div class="bar"><i id="progBar"></i></div></div>
+  </header>
+  <div class="shell">
+    <nav id="side" aria-label="Mövzular"></nav>
+    <main id="main"></main>
+  </div>
+</div>
+<div id="scrim"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-asm.min.js"></script>
+<script>
+"use strict";
+/* ---------- köməkçilər ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const KW = 'SELECT FROM WHERE AND OR NOT IN BETWEEN LIKE IS NULL ORDER BY GROUP HAVING LIMIT OFFSET DISTINCT AS ASC DESC INSERT INTO VALUES UPDATE SET DELETE CREATE TABLE VIEW INDEX ON PRIMARY KEY INTEGER TEXT REAL JOIN INNER LEFT OUTER UNION ALL WITH RECURSIVE CASE WHEN THEN ELSE END OVER PARTITION EXISTS COUNT SUM AVG MIN MAX ROUND UPPER LOWER LENGTH COALESCE ROW_NUMBER RANK DENSE_RANK LAG LEAD STRFTIME SUBSTR EXPLAIN QUERY PLAN ALTER ADD COLUMN DROP DEFAULT CHECK UNIQUE REFERENCES FOREIGN'.split(' ');
+const KWRE = new RegExp("('(?:[^']|'')*')|(--[^\\n]*)|\\b(\\d+(?:\\.\\d+)?)\\b|\\b(" + KW.join('|') + ")\\b", 'gi');
+function hl(sql) {
+  let out = '', last = 0, m; KWRE.lastIndex = 0;
+  while ((m = KWRE.exec(sql))) {
+    out += esc(sql.slice(last, m.index));
+    const c = m[1] ? 's' : m[2] ? 'c' : m[3] ? 'n' : 'k';
+    out += '<span class="' + c + '">' + esc(m[0]) + '</span>';
+    last = m.index + m[0].length;
+  }
+  return out + esc(sql.slice(last));
+}
+const ex = sql => '<div class="ex"><pre>' + hl(sql) + '</pre><button class="btn mini" type="button" data-act="try">Nəticəni gör ▶</button><div class="ex-out"></div></div>';
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } }
+};
+
+/* ---------- verilənlər bazası ---------- */
+const SCHEMA = [
+  { t: 'musteriler', d: 'müştərilər', c: [['id', 'INTEGER', 'pk'], ['ad', 'TEXT'], ['soyad', 'TEXT'], ['seher', 'TEXT'], ['yas', 'INTEGER'], ['email', 'TEXT'], ['telefon', 'TEXT'], ['qeydiyyat_tarixi', 'TEXT']] },
+  { t: 'mehsullar', d: 'məhsullar', c: [['id', 'INTEGER', 'pk'], ['ad', 'TEXT'], ['kateqoriya', 'TEXT'], ['qiymet', 'REAL'], ['stok', 'INTEGER']] },
+  { t: 'sifarisler', d: 'sifarişlər', c: [['id', 'INTEGER', 'pk'], ['musteri_id', 'INTEGER', 'fk'], ['tarix', 'TEXT'], ['status', 'TEXT']] },
+  { t: 'sifaris_detallari', d: 'sifariş sətirləri', c: [['id', 'INTEGER', 'pk'], ['sifaris_id', 'INTEGER', 'fk'], ['mehsul_id', 'INTEGER', 'fk'], ['say', 'INTEGER']] },
+  { t: 'shobeler', d: 'şöbələr', c: [['id', 'INTEGER', 'pk'], ['ad', 'TEXT']] },
+  { t: 'isciler', d: 'işçilər', c: [['id', 'INTEGER', 'pk'], ['ad', 'TEXT'], ['soyad', 'TEXT'], ['vezife', 'TEXT'], ['shobe_id', 'INTEGER', 'fk'], ['maas', 'REAL'], ['menecer_id', 'INTEGER', 'fk'], ['ise_baslama', 'TEXT']] }
+];
+const SCHEMA_TXT = SCHEMA.map(s => s.t + '(' + s.c.map(c => c[0]).join(', ') + ')').join('\n') +
+  '\nƏlaqələr: sifarisler.musteri_id→musteriler.id, sifaris_detallari.sifaris_id→sifarisler.id, sifaris_detallari.mehsul_id→mehsullar.id, isciler.shobe_id→shobeler.id, isciler.menecer_id→isciler.id' +
+  '\nDəyərlər: mehsullar.kateqoriya = Elektronika, Kitab, Ev, Sport; sifarisler.status = hazirlanir, gonderildi, catdirildi, legv_edildi';
+
+const DET = [];
+for (let o = 1, id = 1; o <= 30; o++) {
+  const p1 = ((o * 3) % 13) + 1; let p2 = ((o * 5 + 2) % 13) + 1; if (p2 === p1) p2 = (p2 % 13) + 1;
+  DET.push(`(${id++},${o},${p1},${(o % 3) + 1})`, `(${id++},${o},${p2},${(o % 2) + 1})`);
+}
+const SEED = `
+CREATE TABLE musteriler (id INTEGER PRIMARY KEY, ad TEXT, soyad TEXT, seher TEXT, yas INTEGER, email TEXT, telefon TEXT, qeydiyyat_tarixi TEXT);
+INSERT INTO musteriler VALUES
+(1,'Əli','Məmmədov','Bakı',34,'ali.mammadov@mail.az','050-111-22-33','2022-01-15'),
+(2,'Leyla','Həsənova','Bakı',28,'leyla.h@mail.az',NULL,'2022-03-02'),
+(3,'Rəşad','Quliyev','Gəncə',41,'rashad.q@gmail.com','055-222-33-44','2021-11-20'),
+(4,'Aysel','Əliyeva','Sumqayıt',25,'aysel.a@mail.az','070-333-44-55','2023-02-10'),
+(5,'Elvin','Hüseynov','Bakı',37,'elvin.h@gmail.com',NULL,'2022-07-19'),
+(6,'Nigar','Rzayeva','Şəki',30,'nigar.r@mail.az','051-444-55-66','2023-05-05'),
+(7,'Tural','Əhmədov','Lənkəran',45,'tural.a@gmail.com','050-555-66-77','2021-09-30'),
+(8,'Səbinə','Kərimova','Bakı',22,'sabina.k@mail.az','077-666-77-88','2023-08-14'),
+(9,'Orxan','Babayev','Gəncə',33,'orxan.b@gmail.com',NULL,'2022-12-01'),
+(10,'Günel','İsmayılova','Sumqayıt',29,'gunel.i@mail.az','055-777-88-99','2023-01-25'),
+(11,'Kamran','Əsgərov','Bakı',52,'kamran.e@gmail.com','050-888-99-00','2020-06-18'),
+(12,'Fidan','Nəbiyeva','Şəki',26,'fidan.n@mail.az',NULL,'2024-02-09'),
+(13,'Vüsal','Cəfərov','Lənkəran',39,'vusal.c@gmail.com','070-123-45-67','2024-03-21'),
+(14,'Zaur','Mustafayev','Bakı',31,'zaur.m@mail.az','051-234-56-78','2024-04-11'),
+(15,'Nərmin','Sadıqova','Gəncə',27,'narmin.s@gmail.com',NULL,'2024-06-30'),
+(16,'Samir','Abbasov','Bakı',48,'samir.a@mail.az','077-345-67-89','2024-07-07');
+CREATE TABLE mehsullar (id INTEGER PRIMARY KEY, ad TEXT, kateqoriya TEXT, qiymet REAL, stok INTEGER);
+INSERT INTO mehsullar VALUES
+(1,'Noutbuk Lenovo','Elektronika',1450,12),
+(2,'Smartfon Samsung','Elektronika',980,25),
+(3,'Qulaqlıq Sony','Elektronika',120.5,40),
+(4,'Planşet Apple','Elektronika',1100,8),
+(5,'Python proqramlaşdırma','Kitab',35,100),
+(6,'Əli və Nino','Kitab',18.5,60),
+(7,'İzahlı lüğət','Kitab',22,0),
+(8,'Kofe aparatı','Ev',320,15),
+(9,'Tozsoran','Ev',210,10),
+(10,'Ütü','Ev',65,30),
+(11,'Futbol topu','Sport',45,50),
+(12,'Qaçış ayaqqabısı','Sport',135,22),
+(13,'Yoga matı','Sport',28,0);
+CREATE TABLE sifarisler (id INTEGER PRIMARY KEY, musteri_id INTEGER, tarix TEXT, status TEXT);
+INSERT INTO sifarisler VALUES
+(1,1,'2024-01-12','catdirildi'),(2,2,'2024-01-20','catdirildi'),(3,3,'2024-02-03','catdirildi'),(4,1,'2024-02-14','catdirildi'),
+(5,4,'2024-02-28','legv_edildi'),(6,5,'2024-03-05','catdirildi'),(7,6,'2024-03-18','catdirildi'),(8,7,'2024-04-02','catdirildi'),
+(9,2,'2024-04-15','catdirildi'),(10,8,'2024-04-27','catdirildi'),(11,9,'2024-05-09','catdirildi'),(12,3,'2024-05-21','catdirildi'),
+(13,10,'2024-06-03','catdirildi'),(14,11,'2024-06-17','catdirildi'),(15,1,'2024-06-29','catdirildi'),(16,12,'2024-07-08','catdirildi'),
+(17,5,'2024-07-22','catdirildi'),(18,13,'2024-08-04','catdirildi'),(19,14,'2024-08-19','gonderildi'),(20,6,'2024-09-01','catdirildi'),
+(21,7,'2024-09-12','legv_edildi'),(22,11,'2024-09-25','gonderildi'),(23,8,'2024-10-03','gonderildi'),(24,2,'2024-10-10','hazirlanir'),
+(25,9,'2024-10-15','hazirlanir'),(26,4,'2024-10-20','hazirlanir'),(27,10,'2024-10-24','hazirlanir'),(28,3,'2024-10-28','hazirlanir'),
+(29,13,'2024-10-30','hazirlanir'),(30,1,'2024-11-01','hazirlanir');
+CREATE TABLE sifaris_detallari (id INTEGER PRIMARY KEY, sifaris_id INTEGER, mehsul_id INTEGER, say INTEGER);
+INSERT INTO sifaris_detallari VALUES ${DET.join(',')};
+CREATE TABLE shobeler (id INTEGER PRIMARY KEY, ad TEXT);
+INSERT INTO shobeler VALUES (1,'Satış'),(2,'IT'),(3,'Maliyyə'),(4,'Marketinq');
+CREATE TABLE isciler (id INTEGER PRIMARY KEY, ad TEXT, soyad TEXT, vezife TEXT, shobe_id INTEGER, maas REAL, menecer_id INTEGER, ise_baslama TEXT);
+INSERT INTO isciler VALUES
+(1,'Murad','Əliyev','Baş direktor',1,8000,NULL,'2015-03-01'),
+(2,'Aynur','Səfərova','Satış meneceri',1,4200,1,'2018-06-15'),
+(3,'Kənan','Orucov','Satış təmsilçisi',1,2100,2,'2020-02-10'),
+(4,'Lalə','Vəliyeva','Satış təmsilçisi',1,2300,2,'2021-09-01'),
+(5,'Ruslan','Hacıyev','IT meneceri',2,5200,1,'2017-01-20'),
+(6,'Nicat','Mirzəyev','Proqramçı',2,3800,5,'2019-05-13'),
+(7,'Ülviyyə','Qasımova','Proqramçı',2,4100,5,'2018-11-26'),
+(8,'Rauf','Şükürov','Proqramçı',2,3500,5,'2022-04-04'),
+(9,'Məryəm','Ağayeva','Mühasib',3,2900,1,'2019-08-19'),
+(10,'Emil','Nağıyev','Mühasib',3,2700,9,'2021-01-11'),
+(11,'Səidə','Tağıyeva','Marketinq meneceri',4,3900,1,'2018-03-05'),
+(12,'Cavid','Rəhimov','Dizayner',4,3100,11,'2020-10-12'),
+(13,'Ləman','Şirinova','Kontent meneceri',4,2600,11,'2023-02-27'),
+(14,'Anar','Bayramov','Proqramçı',2,3800,5,'2023-06-01');
+`;
+
+let SQL = null, playDb = null;
+const freshDb = () => { const d = new SQL.Database(); d.exec(SEED); return d; };
+function execAll(db, sql) {
+  try {
+    const res = db.exec(sql);
+    return { ok: true, res: res.length ? res[res.length - 1] : null, changes: db.getRowsModified() };
+  } catch (e) { return { ok: false, error: String(e.message || e) }; }
+}
+
+/* ---------- kurs məzmunu ---------- */
+const LEVELS = ['Başlanğıc', 'Orta', 'Yüksək', 'Advanced'];
+const LESSONS = [
+/* 1 */ { lvl: 0, title: 'SQL nədir? İlk sorğu',
+theory: `
+<p><b>Verilənlər bazası</b> məlumatların nizamla saxlandığı yerdir. Məlumat <b>cədvəllərdə</b> saxlanılır. Cədvəl Excel səhifəsinə bənzəyir: hər <b>sətir</b> bir qeydi, hər <b>sütun</b> bir xüsusiyyəti göstərir.</p>
+<p><b>SQL</b> (Structured Query Language) verilənlər bazası ilə danışmaq üçün dildir. Sən <b>sorğu</b> yazırsan, baza isə cavab olaraq nəticə cədvəli qaytarır.</p>
+<h3>İlk sorğu</h3>
+${ex('SELECT * FROM musteriler;')}
+<ul>
+<li><code>SELECT</code> – göstər</li>
+<li><code>*</code> – bütün sütunları</li>
+<li><code>FROM musteriler</code> – <i>musteriler</i> cədvəlindən</li>
+<li><code>;</code> – sorğunun sonu</li>
+</ul>
+<p class="tip"><b>Qeyd:</b> SQL açar sözləri böyük və ya kiçik hərflə yazıla bilər. Oxumaq asan olsun deyə onları BÖYÜK hərflə yazırıq.</p>
+<p>Bu kursda onlayn mağazanın verilənlər bazası ilə işləyəcəyik: müştərilər, məhsullar, sifarişlər və işçilər. Cədvəllərin sxemini aşağıdakı «Cədvəllərin sxemi» bölməsində görə bilərsən. Sorğunu <b>İşə sal</b> düyməsi ilə sına, hazır olanda <b>Yoxla</b> düyməsinə bas.</p>`,
+tasks: [
+ { q: '<code>musteriler</code> cədvəlindəki bütün sətirləri və bütün sütunları göstər.', sol: 'SELECT * FROM musteriler;', hint: 'SELECT * FROM cədvəl_adı; formasından istifadə et. Cədvəlin adı musteriler-dir.' },
+ { q: '<code>mehsullar</code> cədvəlindəki bütün məlumatı göstər.', sol: 'SELECT * FROM mehsullar;', hint: 'Əvvəlki tapşırıqla eynidir, yalnız cədvəlin adı fərqlidir.' },
+ { q: '<code>isciler</code> cədvəlindəki bütün məlumatı göstər.', sol: 'SELECT * FROM isciler;', hint: 'Cədvəlin adı isciler-dir. Sonda nöqtəli vergül unutma.' }
+]},
+/* 2 */ { lvl: 0, title: 'SELECT: sütunları seçmək, AS və DISTINCT',
+theory: `
+<p>Çox vaxt bütün sütunlar lazım olmur. <code>*</code> əvəzinə lazım olan sütunları <b>vergüllə</b> ayıraraq yaz. Nəticədə sütunlar sənin yazdığın ardıcıllıqla gələcək.</p>
+${ex('SELECT ad, soyad FROM musteriler;')}
+<h3>AS – sütuna yeni ad vermək</h3>
+<p><code>AS</code> ilə nəticədəki sütuna müvəqqəti ad (alias) verə bilərsən. Hesablamalarda da çox işlədilir.</p>
+${ex('SELECT ad AS mehsul, qiymet * 2 AS ikiqat_qiymet FROM mehsullar;')}
+<h3>DISTINCT – təkrarları silmək</h3>
+<p>Eyni dəyər bir neçə dəfə təkrarlanırsa, <code>DISTINCT</code> hər dəyəri yalnız bir dəfə göstərir.</p>
+${ex('SELECT DISTINCT kateqoriya FROM mehsullar;')}`,
+tasks: [
+ { q: '<code>musteriler</code> cədvəlindən yalnız <code>ad</code>, <code>soyad</code> və <code>seher</code> sütunlarını (bu ardıcıllıqla) göstər.', sol: 'SELECT ad, soyad, seher FROM musteriler;', hint: 'SELECT-dən sonra sütun adlarını vergüllə ayırıb yaz. Sonuncu sütundan sonra vergül qoyma.' },
+ { q: '<code>mehsullar</code> cədvəlindən <code>ad</code> sütununu <code>mehsul_adi</code>, <code>qiymet</code> sütununu isə <code>qiymet_azn</code> adı ilə göstər.', sol: 'SELECT ad AS mehsul_adi, qiymet AS qiymet_azn FROM mehsullar;', names: true, hint: 'Hər sütundan sonra AS yeni_ad yaz: ad AS ..., qiymet AS ...' },
+ { q: 'Müştərilərin yaşadığı şəhərləri təkrarsız göstər (bir sütun: <code>seher</code>).', sol: 'SELECT DISTINCT seher FROM musteriler;', hint: 'SELECT-dən dərhal sonra DISTINCT sözünü yaz.' }
+]},
+/* 3 */ { lvl: 0, title: 'WHERE: şərtlə filtrləmə',
+theory: `
+<p><code>WHERE</code> yalnız şərti ödəyən sətirləri saxlayır. O, <code>FROM</code>-dan sonra yazılır.</p>
+${ex("SELECT ad, seher FROM musteriler WHERE seher = 'Bakı';")}
+<p class="tip"><b>Diqqət:</b> mətn dəyərləri <b>tək dırnaq</b> içində yazılır: <code>'Bakı'</code>. Rəqəmlər dırnaqsız yazılır.</p>
+<div class="tw"><table class="info"><tr><th>Operator</th><th>Mənası</th><th>Nümunə</th></tr>
+<tr><td>=</td><td>bərabərdir</td><td>seher = 'Bakı'</td></tr>
+<tr><td>&lt;&gt;</td><td>bərabər deyil</td><td>seher &lt;&gt; 'Bakı'</td></tr>
+<tr><td>&gt; &lt;</td><td>böyükdür, kiçikdir</td><td>yas &gt; 30</td></tr>
+<tr><td>&gt;= &lt;=</td><td>böyük/kiçik və ya bərabərdir</td><td>qiymet &lt;= 100</td></tr></table></div>
+<h3>AND, OR, NOT</h3>
+<p><code>AND</code> – hər iki şərt ödənməlidir. <code>OR</code> – ən azı biri ödənməlidir. <code>NOT</code> – şərti tərsinə çevirir. Qarışıq şərtlərdə mötərizədən istifadə et.</p>
+${ex("SELECT ad, soyad, yas FROM musteriler\nWHERE seher = 'Bakı' AND yas < 30;")}`,
+tasks: [
+ { q: 'Bakıda yaşayan müştərilərin bütün sütunlarını göstər.', sol: "SELECT * FROM musteriler WHERE seher = 'Bakı';", hint: "WHERE seher = '...' yaz. Şəhərin adı tək dırnaq içində olmalıdır: 'Bakı'." },
+ { q: 'Qiyməti 100-dən böyük olan məhsulların <code>ad</code> və <code>qiymet</code> sütunlarını göstər.', sol: 'SELECT ad, qiymet FROM mehsullar WHERE qiymet > 100;', hint: 'Rəqəmi dırnağa almaq lazım deyil: qiymet > 100.' },
+ { q: 'Bakıda yaşayan <b>və</b> yaşı 30-dan böyük olan müştərilərin <code>ad</code>, <code>soyad</code>, <code>yas</code> sütunlarını göstər.', sol: "SELECT ad, soyad, yas FROM musteriler WHERE seher = 'Bakı' AND yas > 30;", hint: 'İki şərti AND ilə birləşdir.' }
+]},
+/* 4 */ { lvl: 0, title: 'IN, BETWEEN, LIKE və NULL',
+theory: `
+<p><b>IN</b> – dəyər siyahıdakılardan biridirsə. Bir neçə <code>OR</code> əvəzinə qısa yazılış:</p>
+${ex("SELECT ad, seher FROM musteriler\nWHERE seher IN ('Bakı', 'Gəncə');")}
+<p><b>BETWEEN</b> – iki say arasında (hər iki ucu daxil):</p>
+${ex('SELECT ad, qiymet FROM mehsullar\nWHERE qiymet BETWEEN 20 AND 100;')}
+<p><b>LIKE</b> – mətndə şablon axtarışı. <code>%</code> istənilən sayda simvol, <code>_</code> tam bir simvol deməkdir.</p>
+${ex("SELECT ad, email FROM musteriler\nWHERE email LIKE '%@mail.az';")}
+<h3>NULL – boş dəyər</h3>
+<p><code>NULL</code> «dəyər yoxdur» deməkdir. Sıfır və ya boş mətn deyil. <code>telefon = NULL</code> <b>işləmir</b>. Düzgün yazılış: <code>IS NULL</code> və ya <code>IS NOT NULL</code>.</p>
+${ex('SELECT ad, soyad FROM musteriler\nWHERE telefon IS NULL;')}`,
+tasks: [
+ { q: 'Şəhəri Bakı, Gəncə və ya Sumqayıt olan müştərilərin <code>ad</code>, <code>soyad</code>, <code>seher</code> sütunlarını göstər. <code>IN</code> istifadə et.', sol: "SELECT ad, soyad, seher FROM musteriler WHERE seher IN ('Bakı', 'Gəncə', 'Sumqayıt');", hint: "WHERE seher IN ('...', '...', '...') – hər şəhər tək dırnaqda, mötərizədə və vergüllə ayrılmış olsun." },
+ { q: 'Qiyməti 50 ilə 200 arasında (hər ikisi daxil) olan məhsulların <code>ad</code> və <code>qiymet</code> sütunlarını göstər.', sol: 'SELECT ad, qiymet FROM mehsullar WHERE qiymet BETWEEN 50 AND 200;', hint: 'qiymet BETWEEN aşağı_hədd AND yuxarı_hədd' },
+ { q: 'E-poçtu <code>gmail.com</code> ilə bitən müştərilərin <code>ad</code> və <code>email</code> sütunlarını göstər.', sol: "SELECT ad, email FROM musteriler WHERE email LIKE '%gmail.com';", hint: "LIKE ilə şablon yaz. Sondakı hissə sabitdir, əvvəli isə istənilən ola bilər: '%...'" },
+ { q: 'Telefon nömrəsi olmayan (<code>telefon</code> boşdur) müştərilərin <code>ad</code> və <code>soyad</code> sütunlarını göstər.', sol: 'SELECT ad, soyad FROM musteriler WHERE telefon IS NULL;', hint: 'NULL ilə müqayisə üçün = işləmir. IS NULL yaz.' }
+]},
+/* 5 */ { lvl: 0, title: 'ORDER BY və LIMIT: sıralama',
+theory: `
+<p>Sətirlərin sırasını <code>ORDER BY</code> ilə təyin edirsən. Susmaya görə sıralama artan (<code>ASC</code>) olur. Azalan üçün <code>DESC</code> yaz.</p>
+${ex('SELECT ad, qiymet FROM mehsullar\nORDER BY qiymet DESC;')}
+<p>Bir neçə sütunla sıralamaq olar. İlk sütundakı dəyərlər eynidirsə, ikincisinə baxılır:</p>
+${ex('SELECT ad, kateqoriya, qiymet FROM mehsullar\nORDER BY kateqoriya, qiymet DESC;')}
+<h3>LIMIT – sətir sayını məhdudlaşdırmaq</h3>
+<p><code>LIMIT n</code> yalnız ilk n sətri qaytarır. «Ən bahalı 3 məhsul» kimi sorğular üçün <code>ORDER BY</code> ilə birlikdə işlədilir. <code>OFFSET</code> ilk sətirləri atlamağa imkan verir.</p>
+${ex('SELECT ad, qiymet FROM mehsullar\nORDER BY qiymet DESC\nLIMIT 3;')}
+<p class="tip"><b>Yadda saxla:</b> <code>ORDER BY</code> və <code>LIMIT</code> həmişə sorğunun sonunda yazılır.</p>`,
+tasks: [
+ { q: 'Bütün məhsulların <code>ad</code> və <code>qiymet</code> sütunlarını qiymətə görə <b>azalan</b> sırada göstər.', sol: 'SELECT ad, qiymet FROM mehsullar ORDER BY qiymet DESC;', ordered: true, hint: 'ORDER BY qiymet DESC' },
+ { q: 'Ən bahalı 3 məhsulun <code>ad</code> və <code>qiymet</code> sütunlarını göstər (ən bahalı birinci).', sol: 'SELECT ad, qiymet FROM mehsullar ORDER BY qiymet DESC LIMIT 3;', ordered: true, hint: 'Əvvəl qiymətə görə azalan sırala, sonra LIMIT 3 yaz.' },
+ { q: '<code>ad</code>, <code>seher</code>, <code>yas</code> sütunlarını göstər. Əvvəl şəhərə görə əlifba sırası ilə (A→Z), eyni şəhərdə isə yaşa görə <b>azalan</b> sırala.', sol: 'SELECT ad, seher, yas FROM musteriler ORDER BY seher ASC, yas DESC;', ordered: true, hint: 'ORDER BY seher, yas DESC – DESC yalnız özündən əvvəlki sütuna aiddir.' }
+]},
+/* 6 */ { lvl: 1, title: 'Aqreqat funksiyalar',
+theory: `
+<p>Aqreqat funksiyalar çox sətirdən <b>bir nəticə</b> hesablayır:</p>
+<div class="tw"><table class="info"><tr><th>Funksiya</th><th>Nə edir</th></tr>
+<tr><td>COUNT(*)</td><td>sətirlərin sayı</td></tr>
+<tr><td>COUNT(sütun)</td><td>həmin sütunda NULL olmayan dəyərlərin sayı</td></tr>
+<tr><td>SUM(sütun)</td><td>cəmi</td></tr>
+<tr><td>AVG(sütun)</td><td>orta qiymət</td></tr>
+<tr><td>MIN / MAX</td><td>ən kiçik / ən böyük</td></tr>
+<tr><td>ROUND(x, n)</td><td>n rəqəmə qədər yuvarlaqlaşdırır</td></tr></table></div>
+${ex('SELECT COUNT(*) AS say, ROUND(AVG(qiymet), 2) AS orta_qiymet FROM mehsullar;')}
+<p><code>WHERE</code> əvvəlcə sətirləri süzür, aqreqat funksiya isə qalan sətirlər üzərində hesablayır:</p>
+${ex("SELECT COUNT(*) FROM musteriler WHERE seher = 'Bakı';")}
+<p class="tip"><b>Fərq:</b> <code>COUNT(*)</code> bütün sətirləri, <code>COUNT(telefon)</code> isə yalnız telefonu olanları sayır.</p>`,
+tasks: [
+ { q: 'Neçə müştəri olduğunu tap (bir ədəd).', sol: 'SELECT COUNT(*) FROM musteriler;', hint: 'COUNT(*) istifadə et.' },
+ { q: 'Məhsulların ən aşağı, ən yuxarı və orta qiymətini bir sətirdə göstər (bu ardıcıllıqla üç sütun).', sol: 'SELECT MIN(qiymet), MAX(qiymet), AVG(qiymet) FROM mehsullar;', hint: 'Üç funksiyanı vergüllə ayır: MIN(...), MAX(...), AVG(...)' },
+ { q: '<code>Elektronika</code> kateqoriyasındakı məhsulların ümumi <code>stok</code> sayını tap.', sol: "SELECT SUM(stok) FROM mehsullar WHERE kateqoriya = 'Elektronika';", hint: 'Əvvəl WHERE ilə kateqoriyanı süz, SELECT-də isə SUM(stok) yaz.' }
+]},
+/* 7 */ { lvl: 1, title: 'GROUP BY və HAVING',
+theory: `
+<p><code>GROUP BY</code> sətirləri qruplara bölür, aqreqat funksiya isə <b>hər qrup üçün ayrıca</b> hesablanır.</p>
+${ex('SELECT kateqoriya, COUNT(*) AS say, ROUND(AVG(qiymet), 2) AS orta\nFROM mehsullar\nGROUP BY kateqoriya;')}
+<p>Qrupları da süzmək istəyirsənsə <code>HAVING</code> işlət. <code>WHERE</code> qruplaşmadan <b>əvvəl</b> sətirləri, <code>HAVING</code> isə qruplaşmadan <b>sonra</b> qrupları süzür.</p>
+${ex('SELECT kateqoriya, COUNT(*) AS say\nFROM mehsullar\nGROUP BY kateqoriya\nHAVING COUNT(*) >= 4;')}
+<h3>Sorğunun icra sırası</h3>
+<p><code>FROM</code> → <code>WHERE</code> → <code>GROUP BY</code> → <code>HAVING</code> → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. Bu sıranı bilmək xətaları tapmağa çox kömək edir. Məsələn, aqreqat funksiyanı <code>WHERE</code>-də yazmaq olmaz, çünki o anda qruplar hələ yoxdur.</p>`,
+tasks: [
+ { q: 'Hər şəhərdə neçə müştəri olduğunu göstər. İki sütun: <code>seher</code> və <code>say</code>.', sol: 'SELECT seher, COUNT(*) AS say FROM musteriler GROUP BY seher;', hint: 'SELECT seher, COUNT(*) ... GROUP BY seher' },
+ { q: 'Hər kateqoriya üzrə məhsulların orta qiymətini göstər. İki sütun: <code>kateqoriya</code> və orta qiymət.', sol: 'SELECT kateqoriya, AVG(qiymet) FROM mehsullar GROUP BY kateqoriya;', hint: 'GROUP BY kateqoriya və SELECT-də AVG(qiymet) yaz.' },
+ { q: 'Müştəri sayı 2-dən çox olan şəhərləri göstər. İki sütun: <code>seher</code> və <code>say</code>.', sol: 'SELECT seher, COUNT(*) AS say FROM musteriler GROUP BY seher HAVING COUNT(*) > 2;', hint: 'Qrupları süzmək üçün WHERE yox, HAVING lazımdır. GROUP BY-dan sonra yazılır.' }
+]},
+/* 8 */ { lvl: 1, title: 'INSERT, UPDATE, DELETE: məlumatı dəyişmək',
+theory: `
+<p>İndiyə qədər yalnız məlumatı oxuduq. İndi onu dəyişəcəyik.</p>
+<h3>INSERT – yeni sətir əlavə etmək</h3>
+${ex("INSERT INTO shobeler (id, ad) VALUES (5, 'Hüquq');\nSELECT * FROM shobeler;")}
+<h3>UPDATE – mövcud sətirləri dəyişmək</h3>
+${ex("UPDATE mehsullar SET stok = stok + 10 WHERE kateqoriya = 'Kitab';\nSELECT ad, stok FROM mehsullar WHERE kateqoriya = 'Kitab';")}
+<h3>DELETE – sətirləri silmək</h3>
+${ex("DELETE FROM sifarisler WHERE status = 'legv_edildi';\nSELECT COUNT(*) FROM sifarisler;")}
+<p class="tip"><b>Təhlükə:</b> <code>UPDATE</code> və <code>DELETE</code>-də <code>WHERE</code> yazmasan, <b>bütün</b> sətirlər dəyişər və ya silinər. Real bazada bu çox ciddi xətadır. Bu saytda hər işə salma təzə verilənlər bazası üzərində işləyir, ona görə qorxmadan sına.</p>`,
+tasks: [
+ { q: '<code>mehsullar</code> cədvəlinə yeni məhsul əlavə et: <code>id</code> = 14, <code>ad</code> = \'Monitor Dell\', <code>kateqoriya</code> = \'Elektronika\', <code>qiymet</code> = 450, <code>stok</code> = 10.', sol: "INSERT INTO mehsullar (id, ad, kateqoriya, qiymet, stok) VALUES (14, 'Monitor Dell', 'Elektronika', 450, 10);", verify: 'SELECT * FROM mehsullar ORDER BY id', hint: 'INSERT INTO cədvəl (sütunlar) VALUES (dəyərlər); Mətn dəyərləri tək dırnaqda olmalıdır.' },
+ { q: '<code>Kitab</code> kateqoriyasındakı bütün məhsulların qiymətini 10% artır (qiyməti 1.1-ə vur).', sol: "UPDATE mehsullar SET qiymet = qiymet * 1.1 WHERE kateqoriya = 'Kitab';", verify: 'SELECT * FROM mehsullar ORDER BY id', hint: "UPDATE mehsullar SET qiymet = ... WHERE ... – WHERE-i unutma, yoxsa bütün məhsulların qiyməti dəyişər." },
+ { q: 'Stokda olmayan (<code>stok</code> = 0) məhsulları <code>mehsullar</code> cədvəlindən sil.', sol: 'DELETE FROM mehsullar WHERE stok = 0;', verify: 'SELECT * FROM mehsullar ORDER BY id', hint: 'DELETE FROM cədvəl WHERE şərt;' }
+]},
+/* 9 */ { lvl: 1, title: 'CASE, COALESCE, mətn və tarix funksiyaları',
+theory: `
+<h3>CASE – şərtə görə dəyər seçmək</h3>
+<p>Proqramlaşdırmadakı if-else kimidir.</p>
+${ex("SELECT ad, yas,\n  CASE\n    WHEN yas < 30 THEN 'gənc'\n    WHEN yas < 45 THEN 'orta'\n    ELSE 'yaşlı'\n  END AS qrup\nFROM musteriler;")}
+<h3>COALESCE – NULL əvəzinə dəyər</h3>
+<p><code>COALESCE(a, b)</code> a boş deyilsə a-nı, boşdursa b-ni qaytarır.</p>
+${ex("SELECT ad, COALESCE(telefon, 'yoxdur') AS telefon FROM musteriler;")}
+<h3>Mətn funksiyaları</h3>
+<div class="tw"><table class="info"><tr><th>Funksiya</th><th>Nə edir</th></tr>
+<tr><td>UPPER(x), LOWER(x)</td><td>böyük / kiçik hərflərə çevirir</td></tr>
+<tr><td>LENGTH(x)</td><td>simvol sayı</td></tr>
+<tr><td>SUBSTR(x, başlanğıc, uzunluq)</td><td>mətnin bir hissəsini kəsir</td></tr>
+<tr><td>a || b</td><td>iki mətni birləşdirir</td></tr></table></div>
+${ex("SELECT ad || ' ' || soyad AS tam_ad, UPPER(email) AS email_boyuk FROM musteriler;")}
+<h3>Tarix funksiyaları</h3>
+<p>SQLite-da tarix mətn kimi saxlanılır (<code>'2024-05-21'</code>). <code>strftime</code> ondan il, ay, gün kimi hissələri çıxarır.</p>
+${ex("SELECT tarix, strftime('%Y', tarix) AS il, strftime('%m', tarix) AS ay FROM sifarisler LIMIT 5;")}`,
+tasks: [
+ { q: 'Hər məhsulun <code>ad</code>, <code>qiymet</code> və qiymət qrupunu göstər (üç sütun). Qiymət 50-dən azdırsa <code>\'ucuz\'</code>, 50 ilə 500 arasındadırsa (500 daxil) <code>\'orta\'</code>, 500-dən çoxdursa <code>\'bahali\'</code> yaz.', sol: "SELECT ad, qiymet, CASE WHEN qiymet < 50 THEN 'ucuz' WHEN qiymet <= 500 THEN 'orta' ELSE 'bahali' END AS sinif FROM mehsullar;", hint: 'CASE WHEN şərt THEN dəyər ... ELSE dəyər END. Şərtlər yuxarıdan aşağı yoxlanılır.' },
+ { q: 'Müştərilərin e-poçtunu böyük hərflərlə və e-poçtun simvol sayını göstər (iki sütun, bu ardıcıllıqla).', sol: 'SELECT UPPER(email), LENGTH(email) FROM musteriler;', hint: 'UPPER(email) və LENGTH(email) funksiyalarını istifadə et.' },
+ { q: '<code>sifarisler</code> cədvəlindən <code>id</code> və sifarişin verildiyi ayın nömrəsini (məsələn \'01\') göstər (iki sütun).', sol: "SELECT id, strftime('%m', tarix) AS ay FROM sifarisler;", hint: "strftime('%m', tarix) ay nömrəsini qaytarır." },
+ { q: 'Müştərilərin <code>ad</code> və <code>telefon</code> sütunlarını göstər. Telefonu olmayanlarda <code>\'yoxdur\'</code> yazılsın.', sol: "SELECT ad, COALESCE(telefon, 'yoxdur') AS telefon FROM musteriler;", hint: "COALESCE(telefon, 'yoxdur')" }
+]},
+/* 10 */ { lvl: 2, title: 'JOIN: cədvəlləri birləşdirmək',
+theory: `
+<p>Məlumat bir cədvəldə deyil, bir neçə əlaqəli cədvəldə saxlanılır. Məsələn, <code>sifarisler</code> cədvəlində müştərinin adı yoxdur, yalnız <code>musteri_id</code> var. Bu, <code>musteriler.id</code>-yə istinad edir. Belə sütuna <b>xarici açar</b> (foreign key) deyilir.</p>
+<p><code>INNER JOIN</code> iki cədvəli <code>ON</code> şərti ilə birləşdirir və yalnız hər iki tərəfdə uyğunluğu olan sətirləri saxlayır.</p>
+${ex('SELECT s.id, s.tarix, m.ad, m.soyad\nFROM sifarisler s\nINNER JOIN musteriler m ON s.musteri_id = m.id;')}
+<p><code>s</code> və <code>m</code> cədvəl <b>alias</b>-larıdır. Sorğunu qısaldır və iki cədvəldə eyni adlı sütun (məsələn <code>id</code>, <code>ad</code>) olanda hansının nəzərdə tutulduğunu göstərir: <code>m.ad</code>.</p>
+<p>JOIN-i GROUP BY ilə birləşdirmək də olar:</p>
+${ex('SELECT m.seher, COUNT(*) AS sifaris_sayi\nFROM sifarisler s\nJOIN musteriler m ON s.musteri_id = m.id\nGROUP BY m.seher;')}
+<p class="tip"><b>Yadda saxla:</b> <code>JOIN</code> təkbaşına <code>INNER JOIN</code> deməkdir.</p>`,
+tasks: [
+ { q: 'Hər sifarişin <code>id</code>, <code>tarix</code> və müştərinin <code>ad</code>ını göstər (üç sütun).', sol: 'SELECT s.id, s.tarix, m.ad FROM sifarisler s INNER JOIN musteriler m ON s.musteri_id = m.id;', hint: 'sifarisler və musteriler cədvəllərini birləşdir: ON s.musteri_id = m.id' },
+ { q: '<code>sifaris_detallari</code> cədvəlindən hər sətir üçün <code>sifaris_id</code>, məhsulun adı və <code>say</code> sütunlarını göstər (üç sütun).', sol: 'SELECT d.sifaris_id, p.ad, d.say FROM sifaris_detallari d JOIN mehsullar p ON d.mehsul_id = p.id;', hint: 'sifaris_detallari.mehsul_id ilə mehsullar.id-ni birləşdir.' },
+ { q: '<code>Elektronika</code> məhsullarının hər biri üzrə satılan ümumi miqdarı göstər: məhsulun adı və <code>say</code>-ların cəmi (iki sütun).', sol: "SELECT p.ad, SUM(d.say) AS toplam FROM mehsullar p JOIN sifaris_detallari d ON d.mehsul_id = p.id WHERE p.kateqoriya = 'Elektronika' GROUP BY p.id, p.ad;", hint: 'JOIN et, WHERE ilə kateqoriyanı süz, sonra məhsul üzrə GROUP BY et və SUM(d.say) hesabla.' }
+]},
+/* 11 */ { lvl: 2, title: 'LEFT JOIN və çoxlu JOIN',
+theory: `
+<p><code>LEFT JOIN</code> sol cədvəlin <b>bütün</b> sətirlərini saxlayır. Sağ cədvəldə uyğunluq tapılmasa, sağ tərəfin sütunları <code>NULL</code> olur.</p>
+${ex('SELECT m.ad, s.id AS sifaris_id\nFROM musteriler m\nLEFT JOIN sifarisler s ON s.musteri_id = m.id;')}
+<h3>Heç nəyi olmayanları tapmaq</h3>
+<p>LEFT JOIN-dən sonra sağ tərəfin açarı <code>IS NULL</code> olan sətirlər uyğunluğu olmayanlardır:</p>
+${ex('SELECT m.ad, m.soyad\nFROM musteriler m\nLEFT JOIN sifarisler s ON s.musteri_id = m.id\nWHERE s.id IS NULL;')}
+<h3>LEFT JOIN və COUNT</h3>
+<p>Uyğunluğu olmayan sətirlərin 0 çıxması üçün <code>COUNT(*)</code> yox, <code>COUNT(s.id)</code> yaz. Çünki <code>COUNT(*)</code> NULL sətirini də bir sətir kimi sayar.</p>
+<h3>Üç və daha çox cədvəl</h3>
+<p>Hər <code>JOIN ... ON ...</code> zəncirə növbəti cədvəli əlavə edir:</p>
+${ex('SELECT s.id, m.ad AS musteri, p.ad AS mehsul, d.say\nFROM sifarisler s\nJOIN musteriler m ON m.id = s.musteri_id\nJOIN sifaris_detallari d ON d.sifaris_id = s.id\nJOIN mehsullar p ON p.id = d.mehsul_id\nLIMIT 6;')}`,
+tasks: [
+ { q: 'Heç sifariş verməyən müştərilərin <code>ad</code> və <code>soyad</code> sütunlarını göstər.', sol: 'SELECT m.ad, m.soyad FROM musteriler m LEFT JOIN sifarisler s ON s.musteri_id = m.id WHERE s.id IS NULL;', hint: 'musteriler-i sifarisler ilə LEFT JOIN et, sonra sifarisin id-si NULL olan sətirləri saxla.' },
+ { q: 'Hər müştərinin <code>ad</code>, <code>soyad</code> və sifariş sayını göstər. Sifarişi olmayanlarda 0 çıxmalıdır (üç sütun).', sol: 'SELECT m.ad, m.soyad, COUNT(s.id) AS say FROM musteriler m LEFT JOIN sifarisler s ON s.musteri_id = m.id GROUP BY m.id, m.ad, m.soyad;', hint: 'LEFT JOIN + GROUP BY m.id. COUNT(*) yox, COUNT(s.id) istifadə et.' },
+ { q: 'Hər sifariş sətri üçün müştərinin adını, məhsulun adını və miqdarı göstər (üç sütun: müştəri <code>ad</code>, məhsul <code>ad</code>, <code>say</code>). Dörd cədvəl lazımdır: <code>sifarisler</code>, <code>musteriler</code>, <code>sifaris_detallari</code> və <code>mehsullar</code>.', sol: 'SELECT m.ad, p.ad, d.say FROM sifarisler s JOIN musteriler m ON m.id = s.musteri_id JOIN sifaris_detallari d ON d.sifaris_id = s.id JOIN mehsullar p ON p.id = d.mehsul_id;', hint: 'sifarisler-dən başla, ardıcıl olaraq musteriler, sifaris_detallari və mehsullar cədvəllərini JOIN et.' },
+ { q: 'Hər müştərinin ümumi xərclədiyi məbləği tap (<code>say</code> × <code>qiymet</code>-in cəmi). Ləğv olunmuş (<code>legv_edildi</code>) sifarişləri hesaba qatma. İki sütun: müştərinin <code>ad</code>ı və məbləğ.', sol: "SELECT m.ad, SUM(d.say * p.qiymet) AS cem FROM musteriler m JOIN sifarisler s ON s.musteri_id = m.id JOIN sifaris_detallari d ON d.sifaris_id = s.id JOIN mehsullar p ON p.id = d.mehsul_id WHERE s.status <> 'legv_edildi' GROUP BY m.id, m.ad;", hint: "4 cədvəli JOIN et, WHERE s.status <> 'legv_edildi' yaz, müştəri üzrə GROUP BY et və SUM(d.say * p.qiymet) hesabla." }
+]},
+/* 12 */ { lvl: 2, title: 'Alt sorğular (subquery)',
+theory: `
+<p><b>Alt sorğu</b> başqa sorğunun içində, mötərizədə yazılan sorğudur.</p>
+<h3>Tək dəyər qaytaran alt sorğu</h3>
+${ex('SELECT ad, qiymet FROM mehsullar\nWHERE qiymet > (SELECT AVG(qiymet) FROM mehsullar);')}
+<h3>IN ilə siyahı qaytaran alt sorğu</h3>
+${ex("SELECT ad, soyad FROM musteriler\nWHERE id IN (SELECT musteri_id FROM sifarisler WHERE status = 'gonderildi');")}
+<h3>EXISTS</h3>
+<p><code>EXISTS</code> alt sorğu ən azı bir sətir qaytarırsa doğrudur. Böyük bazada <code>IN</code>-dən sürətli ola bilər.</p>
+${ex('SELECT m.ad FROM musteriler m\nWHERE EXISTS (SELECT 1 FROM sifarisler s WHERE s.musteri_id = m.id);')}
+<h3>SELECT içində alt sorğu</h3>
+<p>Alt sorğu xarici sorğunun cari sətrinə istinad edə bilər. Buna <i>korrelyasiyalı</i> alt sorğu deyilir.</p>
+${ex('SELECT ad, kateqoriya, qiymet,\n  (SELECT AVG(qiymet) FROM mehsullar x WHERE x.kateqoriya = m.kateqoriya) AS kateqoriya_orta\nFROM mehsullar m;')}`,
+tasks: [
+ { q: 'Qiyməti bütün məhsulların orta qiymətindən yüksək olan məhsulların <code>ad</code> və <code>qiymet</code> sütunlarını göstər.', sol: 'SELECT ad, qiymet FROM mehsullar WHERE qiymet > (SELECT AVG(qiymet) FROM mehsullar);', hint: 'WHERE qiymet > ( ... ) içində orta qiyməti hesablayan ayrı SELECT yaz.' },
+ { q: 'Ən azı bir <code>catdirildi</code> statuslu sifarişi olan müştərilərin <code>ad</code> və <code>soyad</code> sütunlarını göstər. Alt sorğu istifadə et.', sol: "SELECT ad, soyad FROM musteriler WHERE id IN (SELECT musteri_id FROM sifarisler WHERE status = 'catdirildi');", hint: 'WHERE id IN (SELECT musteri_id FROM sifarisler WHERE ...)' },
+ { q: 'Hər məhsulun <code>ad</code>, <code>qiymet</code> və öz kateqoriyasındakı orta qiyməti göstər (üç sütun). Korrelyasiyalı alt sorğudan istifadə et.', sol: 'SELECT ad, qiymet, (SELECT AVG(qiymet) FROM mehsullar x WHERE x.kateqoriya = m.kateqoriya) FROM mehsullar m;', hint: 'SELECT-in üçüncü sütununda mötərizədə alt sorğu yaz. Alt sorğuda x.kateqoriya = m.kateqoriya şərtindən istifadə et.' }
+]},
+/* 13 */ { lvl: 2, title: 'Self JOIN və UNION',
+theory: `
+<h3>Self JOIN – cədvəli özü ilə birləşdirmək</h3>
+<p><code>isciler</code> cədvəlində hər işçinin <code>menecer_id</code> sütunu başqa işçinin <code>id</code>-sinə istinad edir. Menecerin adını almaq üçün cədvəli özü ilə, fərqli alias-larla birləşdiririk.</p>
+${ex('SELECT e.ad AS isci, m.ad AS menecer\nFROM isciler e\nLEFT JOIN isciler m ON e.menecer_id = m.id;')}
+<p>Baş direktorun meneceri olmadığı üçün <code>LEFT JOIN</code> işlətdik, yoxsa o, nəticədən düşərdi.</p>
+<h3>UNION – nəticələri alt-alta birləşdirmək</h3>
+<p>İki sorğunun nəticəsi eyni sayda və uyğun tipli sütuna malik olmalıdır. <code>UNION</code> təkrarları silir, <code>UNION ALL</code> isə hamısını saxlayır.</p>
+${ex("SELECT ad, 'müştəri' AS tip FROM musteriler\nUNION ALL\nSELECT ad, 'işçi' FROM isciler;")}`,
+tasks: [
+ { q: 'Hər işçinin <code>ad</code>ını və menecerinin <code>ad</code>ını göstər (iki sütun). Meneceri olmayan işçi də siyahıda olsun.', sol: 'SELECT e.ad, m.ad FROM isciler e LEFT JOIN isciler m ON e.menecer_id = m.id;', hint: 'isciler cədvəlini iki dəfə, e və m alias-ları ilə LEFT JOIN et: ON e.menecer_id = m.id' },
+ { q: 'Hər menecerin neçə birbaşa tabeçiliyində işçi olduğunu göstər: menecerin <code>ad</code>ı və işçi sayı (iki sütun). Tabeçiliyində işçisi olmayanlar lazım deyil.', sol: 'SELECT m.ad, COUNT(e.id) AS say FROM isciler m JOIN isciler e ON e.menecer_id = m.id GROUP BY m.id, m.ad;', hint: 'm – menecer, e – işçi. ON e.menecer_id = m.id yaz, sonra m.id üzrə GROUP BY et.' },
+ { q: 'Müştərilərin və işçilərin <code>ad</code>, <code>soyad</code> sütunlarını bir siyahıda birləşdir. Üçüncü sütun <code>tip</code>: müştərilər üçün \'musteri\', işçilər üçün \'isci\'. Heç bir sətir silinməsin.', sol: "SELECT ad, soyad, 'musteri' AS tip FROM musteriler UNION ALL SELECT ad, soyad, 'isci' FROM isciler;", hint: "UNION ALL istifadə et. Hər iki SELECT-də üç sütun olsun: ad, soyad və sabit mətn ('musteri' / 'isci')." }
+]},
+/* 14 */ { lvl: 3, title: 'CTE: WITH ilə oxunaqlı sorğular',
+theory: `
+<p><b>CTE</b> (Common Table Expression) sorğunun başında <code>WITH</code> ilə təyin olunan müvəqqəti adlı nəticədir. Mürəkkəb sorğunu hissələrə bölməyə və oxunaqlı etməyə kömək edir.</p>
+${ex('WITH kateqoriya_orta AS (\n  SELECT kateqoriya, AVG(qiymet) AS orta\n  FROM mehsullar\n  GROUP BY kateqoriya\n)\nSELECT m.ad, m.qiymet, k.orta\nFROM mehsullar m\nJOIN kateqoriya_orta k ON k.kateqoriya = m.kateqoriya\nWHERE m.qiymet > k.orta;')}
+<p>Bir neçə CTE-ni vergüllə ayıraraq yazmaq olar, sonrakı CTE əvvəlkindən istifadə edə bilər.</p>
+<h3>Rekursiv CTE</h3>
+<p>İyerarxiyalı məlumat (işçi–menecer, kateqoriya–alt kateqoriya) üçün <code>WITH RECURSIVE</code> lazımdır. Strukturu iki hissədən ibarətdir: <b>başlanğıc</b> sorğu, sonra <code>UNION ALL</code> və özünə istinad edən <b>rekursiv</b> sorğu. Rekursiya yeni sətir tapılmayanda dayanır.</p>
+${ex('WITH RECURSIVE say(n) AS (\n  SELECT 1\n  UNION ALL\n  SELECT n + 1 FROM say WHERE n < 5\n)\nSELECT n FROM say;')}`,
+tasks: [
+ { q: '<code>WITH</code> istifadə edərək hər sifarişin məbləğini (<code>say</code> × <code>qiymet</code>-in cəmi) hesabla və məbləği 1000-dən çox olan sifarişlərin <code>sifaris_id</code> və məbləğini göstər (iki sütun).', sol: 'WITH m AS (SELECT d.sifaris_id, SUM(d.say * p.qiymet) AS mebleg FROM sifaris_detallari d JOIN mehsullar p ON p.id = d.mehsul_id GROUP BY d.sifaris_id) SELECT sifaris_id, mebleg FROM m WHERE mebleg > 1000;', hint: 'WITH ad AS ( sifariş məbləğlərini hesablayan sorğu ) SELECT ... FROM ad WHERE mebleg > 1000;' },
+ { q: 'Öz şöbəsindəki orta maaşdan çox maaş alan işçilərin <code>ad</code> və <code>maas</code> sütunlarını göstər. CTE ilə şöbə üzrə orta maaşı hesabla.', sol: 'WITH ort AS (SELECT shobe_id, AVG(maas) AS orta FROM isciler GROUP BY shobe_id) SELECT i.ad, i.maas FROM isciler i JOIN ort o ON o.shobe_id = i.shobe_id WHERE i.maas > o.orta;', hint: 'Əvvəl CTE-də shobe_id və AVG(maas) hesabla, sonra isciler ilə shobe_id üzrə JOIN edib maaşları müqayisə et.' },
+ { q: 'Rekursiv CTE ilə təşkilat iyerarxiyasını göstər: <code>ad</code> və <code>seviyye</code> (iki sütun). Meneceri olmayan Baş direktor 1-ci səviyyədir, onun birbaşa tabeçiliyindəkilər 2-ci və s.', sol: 'WITH RECURSIVE ier AS (SELECT id, ad, 1 AS seviyye FROM isciler WHERE menecer_id IS NULL UNION ALL SELECT i.id, i.ad, ier.seviyye + 1 FROM isciler i JOIN ier ON i.menecer_id = ier.id) SELECT ad, seviyye FROM ier;', hint: 'Başlanğıc: WHERE menecer_id IS NULL və 1 AS seviyye. Rekursiv hissə: isciler-i ier ilə i.menecer_id = ier.id üzrə JOIN et və seviyye + 1 yaz.' }
+]},
+/* 15 */ { lvl: 3, title: 'Window funksiyaları',
+theory: `
+<p><code>GROUP BY</code> sətirləri birləşdirib sayını azaldır. <b>Window funksiyası</b> isə hər sətri saxlayır, əlavə olaraq həmin sətir üçün «pəncərə» (qrup) üzərində hesablanmış dəyər əlavə edir. Yazılışı: <code>funksiya() OVER (PARTITION BY ... ORDER BY ...)</code>.</p>
+${ex('SELECT ad, shobe_id, maas,\n  SUM(maas) OVER (PARTITION BY shobe_id) AS shobe_cemi\nFROM isciler;')}
+<h3>Sıralama funksiyaları</h3>
+<div class="tw"><table class="info"><tr><th>Funksiya</th><th>Nə edir</th></tr>
+<tr><td>ROW_NUMBER()</td><td>1, 2, 3, 4 – bərabər dəyərlərdə də fərqli nömrə verir</td></tr>
+<tr><td>RANK()</td><td>1, 2, 2, 4 – bərabərlərə eyni yer, sonra boşluq</td></tr>
+<tr><td>DENSE_RANK()</td><td>1, 2, 2, 3 – boşluq olmur</td></tr></table></div>
+${ex('SELECT ad, shobe_id, maas,\n  RANK() OVER (PARTITION BY shobe_id ORDER BY maas DESC) AS yer\nFROM isciler;')}
+<h3>LAG və LEAD</h3>
+<p>Əvvəlki (<code>LAG</code>) və ya sonrakı (<code>LEAD</code>) sətrin dəyərini götürür.</p>
+${ex('SELECT ad, ise_baslama, maas,\n  LAG(maas) OVER (ORDER BY ise_baslama) AS evvelki_maas\nFROM isciler;')}
+<p class="tip"><b>Qeyd:</b> window funksiyasının nəticəsini <code>WHERE</code>-də birbaşa istifadə etmək olmaz. Əvvəl CTE və ya alt sorğu içində hesabla, sonra xaricdə süz.</p>`,
+tasks: [
+ { q: 'Hər işçinin <code>ad</code>, <code>shobe_id</code>, <code>maas</code> və şöbəsi daxilində maaşa görə (azalan) yerini göstər. <code>RANK()</code> istifadə et (dörd sütun).', sol: 'SELECT ad, shobe_id, maas, RANK() OVER (PARTITION BY shobe_id ORDER BY maas DESC) AS yer FROM isciler;', hint: 'RANK() OVER (PARTITION BY shobe_id ORDER BY maas DESC)' },
+ { q: 'Hər şöbədə ən çox maaş alan 2 işçinin <code>ad</code>, <code>shobe_id</code>, <code>maas</code> sütunlarını göstər (üç sütun).', sol: 'WITH s AS (SELECT ad, shobe_id, maas, ROW_NUMBER() OVER (PARTITION BY shobe_id ORDER BY maas DESC) AS sira FROM isciler) SELECT ad, shobe_id, maas FROM s WHERE sira <= 2;', hint: 'Window nəticəsini WHERE-də birbaşa işlətmək olmur. CTE-də ROW_NUMBER() hesabla, xaricdə sira <= 2 ilə süz.' },
+ { q: 'Hər işçinin <code>ad</code>, <code>shobe_id</code>, <code>maas</code> və öz şöbəsinin ümumi maaş fondunu göstər (dörd sütun). <code>GROUP BY</code> işlətmə, bütün işçilər görünməlidir.', sol: 'SELECT ad, shobe_id, maas, SUM(maas) OVER (PARTITION BY shobe_id) AS shobe_cemi FROM isciler;', hint: 'SUM(maas) OVER (PARTITION BY shobe_id)' },
+ { q: 'İşçiləri işə başlama tarixinə görə sırala və hər işçinin yanında <b>əvvəl işə başlayan</b> işçinin maaşını göstər: <code>ad</code>, <code>ise_baslama</code>, <code>maas</code>, əvvəlki maaş (dörd sütun). İlk işçidə NULL olmalıdır.', sol: 'SELECT ad, ise_baslama, maas, LAG(maas) OVER (ORDER BY ise_baslama) AS evvelki_maas FROM isciler;', hint: 'LAG(maas) OVER (ORDER BY ise_baslama)' }
+]},
+/* 16 */ { lvl: 3, title: 'CREATE TABLE, VIEW və INDEX',
+theory: `
+<h3>CREATE TABLE – yeni cədvəl</h3>
+<p>Cədvəl yaradanda hər sütunun adını, tipini və lazım gələrsə məhdudiyyətlərini yazırsan.</p>
+${ex("CREATE TABLE kuponlar (\n  id INTEGER PRIMARY KEY,\n  kod TEXT NOT NULL UNIQUE,\n  endirim REAL DEFAULT 0 CHECK (endirim >= 0 AND endirim <= 100)\n);\nINSERT INTO kuponlar (kod, endirim) VALUES ('YENI10', 10);\nSELECT * FROM kuponlar;")}
+<div class="tw"><table class="info"><tr><th>Məhdudiyyət</th><th>Mənası</th></tr>
+<tr><td>PRIMARY KEY</td><td>sətri unikal təyin edən açar</td></tr>
+<tr><td>NOT NULL</td><td>boş ola bilməz</td></tr>
+<tr><td>UNIQUE</td><td>təkrarlanmamalıdır</td></tr>
+<tr><td>DEFAULT x</td><td>dəyər verilməsə x yazılır</td></tr>
+<tr><td>CHECK (şərt)</td><td>dəyər şərti ödəməlidir</td></tr></table></div>
+<p>Mövcud cədvələ sütun əlavə etmək: <code>ALTER TABLE cədvəl ADD COLUMN ad TEXT;</code>. Cədvəli silmək: <code>DROP TABLE cədvəl;</code></p>
+<h3>VIEW – yadda saxlanan sorğu</h3>
+<p>View özündə məlumat saxlamır, hər dəfə çağıranda sorğunu işlədir. Tez-tez işlətdiyin mürəkkəb sorğuya ad vermək üçün əlverişlidir.</p>
+${ex('CREATE VIEW ucuz_mehsullar AS\nSELECT ad, qiymet FROM mehsullar WHERE qiymet < 50;\nSELECT * FROM ucuz_mehsullar;')}
+<h3>INDEX – axtarışı sürətləndirmək</h3>
+<p>İndeks kitabın sonundakı mündəricat kimidir. Sütun üzrə axtarış çoxdursa, indeks bazanın bütün cədvəli oxumasının qarşısını alır. Üstünlük: oxuma sürətli olur. Çatışmazlıq: yazma bir qədər yavaşlayır və yer tutur.</p>
+${ex("CREATE INDEX idx_musteri_seher ON musteriler(seher);\nEXPLAIN QUERY PLAN SELECT * FROM musteriler WHERE seher = 'Bakı';")}
+<p>Nəticədə <code>SEARCH ... USING INDEX</code> görünür. İndeks olmasaydı <code>SCAN</code> (bütün cədvəli oxu) yazılardı.</p>`,
+tasks: [
+ { q: '<code>reyler</code> adlı cədvəl yarat. Sütunlar: <code>id</code> (INTEGER, PRIMARY KEY), <code>mehsul_id</code> (INTEGER), <code>musteri_id</code> (INTEGER), <code>bal</code> (INTEGER), <code>metn</code> (TEXT). Sütunları bu ardıcıllıqla yaz.', sol: 'CREATE TABLE reyler (id INTEGER PRIMARY KEY, mehsul_id INTEGER, musteri_id INTEGER, bal INTEGER, metn TEXT);', verify: "SELECT name, type, pk FROM pragma_table_info('reyler') ORDER BY cid", hint: 'CREATE TABLE reyler ( sütun_adı TİP, sütun_adı TİP, ... ); id sütununa PRIMARY KEY əlavə et.' },
+ { q: '<code>bahali_mehsullar</code> adlı view yarat: qiyməti 500-dən çox olan məhsulların <code>ad</code> və <code>qiymet</code> sütunlarını göstərsin.', sol: 'CREATE VIEW bahali_mehsullar AS SELECT ad, qiymet FROM mehsullar WHERE qiymet > 500;', verify: 'SELECT * FROM bahali_mehsullar ORDER BY ad', hint: 'CREATE VIEW ad AS SELECT ...' },
+ { q: '<code>musteriler</code> cədvəlinin <code>email</code> sütunu üzərində <code>idx_musteri_email</code> adlı indeks yarat.', sol: 'CREATE INDEX idx_musteri_email ON musteriler(email);', verify: "SELECT name, tbl_name FROM sqlite_master WHERE type = 'index' AND name = 'idx_musteri_email'", hint: 'CREATE INDEX indeks_adı ON cədvəl(sütun);' }
+]},
+/* 17 */ { lvl: 3, title: 'Final: real analitik sorğular',
+theory: `
+<p>Bu mövzuda bütün öyrəndiklərini birləşdirəcəksən: <code>JOIN</code>, <code>GROUP BY</code>, tarix funksiyaları, CTE və window funksiyaları. Real işdə analitik sorğular belə yazılır.</p>
+<h3>Mürəkkəb sorğunu necə yazmalı?</h3>
+<ul>
+<li>Əvvəl cavabın hansı sütunlardan ibarət olacağını yaz.</li>
+<li>Bu sütunlar hansı cədvəllərdədir? Onları <code>JOIN</code> et.</li>
+<li>Hansı sətirlər lazım deyil? <code>WHERE</code> ilə süz.</li>
+<li>Hesablama lazımdırsa: <code>GROUP BY</code> və aqreqat funksiya.</li>
+<li>Son: <code>ORDER BY</code>, <code>LIMIT</code>.</li>
+<li>Çətinləşirsə, sorğunu CTE-lərlə addım-addım parçala.</li>
+</ul>
+<p>Sorğunu bir dəfəyə yazmağa çalışma. Əvvəl JOIN-i yaz və <b>İşə sal</b> ilə nəticəyə bax, sonra hissə-hissə əlavə et.</p>
+<p class="tip"><b>Məsləhət:</b> müştərinin xərclədiyi məbləği hesablayanda ləğv olunmuş sifarişləri (<code>status = 'legv_edildi'</code>) çıxarmağı unutma.</p>`,
+tasks: [
+ { q: 'Hər şəhər üzrə ümumi satış məbləğini tap (ləğv olunmayan sifarişlər, <code>say</code> × <code>qiymet</code>). İki sütun: <code>seher</code> və məbləğ. Məbləğə görə azalan sırala.', sol: "SELECT m.seher, SUM(d.say * p.qiymet) AS cem FROM musteriler m JOIN sifarisler s ON s.musteri_id = m.id JOIN sifaris_detallari d ON d.sifaris_id = s.id JOIN mehsullar p ON p.id = d.mehsul_id WHERE s.status <> 'legv_edildi' GROUP BY m.seher ORDER BY cem DESC;", ordered: true, hint: 'Dörd cədvəl: musteriler, sifarisler, sifaris_detallari, mehsullar. Şəhər üzrə GROUP BY et, sonda ORDER BY cəmə görə DESC.' },
+ { q: 'Aylar üzrə sifariş sayını göstər. İki sütun: ay (<code>\'2024-01\'</code> formatında) və sifariş sayı. Aylara görə artan sırala.', sol: "SELECT strftime('%Y-%m', tarix) AS ay, COUNT(*) AS say FROM sifarisler GROUP BY ay ORDER BY ay;", ordered: true, hint: "strftime('%Y-%m', tarix) ilə ayı çıxar, həmin ifadə üzrə GROUP BY et." },
+ { q: 'Ən çox pul xərcləyən 3 müştərini göstər (ləğv olunmayan sifarişlər). Üç sütun: <code>ad</code>, <code>soyad</code>, ümumi məbləğ. Ən çox xərcləyən birinci olsun.', sol: "SELECT m.ad, m.soyad, SUM(d.say * p.qiymet) AS cem FROM musteriler m JOIN sifarisler s ON s.musteri_id = m.id JOIN sifaris_detallari d ON d.sifaris_id = s.id JOIN mehsullar p ON p.id = d.mehsul_id WHERE s.status <> 'legv_edildi' GROUP BY m.id, m.ad, m.soyad ORDER BY cem DESC LIMIT 3;", ordered: true, hint: 'Əvvəlki tapşırıqlardakı kimi JOIN et, müştəri üzrə qrupla, cəmə görə DESC sırala və LIMIT 3 yaz.' },
+ { q: 'Hər kateqoriyanın ən bahalı məhsulunu göstər: <code>kateqoriya</code>, <code>ad</code>, <code>qiymet</code> (üç sütun). Window funksiyasından istifadə et.', sol: 'WITH r AS (SELECT kateqoriya, ad, qiymet, ROW_NUMBER() OVER (PARTITION BY kateqoriya ORDER BY qiymet DESC) AS n FROM mehsullar) SELECT kateqoriya, ad, qiymet FROM r WHERE n = 1;', hint: 'CTE-də ROW_NUMBER() OVER (PARTITION BY kateqoriya ORDER BY qiymet DESC) hesabla, xaricdə n = 1 ilə süz.' }
+]}
+];
+/* ---------- əlavə tapşırıqlar (hər mövzuda minimum 6) ---------- */
+const MORE = {
+1: [
+ { q: `<code>shobeler</code> cədvəlindəki bütün məlumatı göstər.`, sol: `SELECT * FROM shobeler;`, hint: `Cədvəlin adı shobeler-dir.` },
+ { q: `<code>sifarisler</code> cədvəlindəki bütün məlumatı göstər.`, sol: `SELECT * FROM sifarisler;`, hint: `SELECT * FROM sifarisler;` },
+ { q: `<code>sifaris_detallari</code> cədvəlindəki bütün məlumatı göstər. Cədvəlin adında alt xətt var.`, sol: `SELECT * FROM sifaris_detallari;`, hint: `Cədvəl adını sxemdən kopyalaya bilərsən: sifaris_detallari.` }
+],
+2: [
+ { q: `<code>isciler</code> cədvəlindən <code>ad</code>, <code>soyad</code> və <code>vezife</code> sütunlarını göstər.`, sol: `SELECT ad, soyad, vezife FROM isciler;`, hint: `Üç sütunu vergüllə ayır.` },
+ { q: `<code>mehsullar</code> cədvəlindən <code>ad</code>, <code>qiymet</code> və ƏDV ilə qiyməti (<code>qiymet</code> × 1.18) göstər. Üçüncü sütunun adı <code>qiymet_edv</code> olsun.`, sol: `SELECT ad, qiymet, qiymet * 1.18 AS qiymet_edv FROM mehsullar;`, hint: `SELECT-in içində hesablama yaza bilərsən: qiymet * 1.18 AS qiymet_edv` },
+ { q: `<code>sifarisler</code> cədvəlində işlənən müxtəlif <code>status</code> dəyərlərini təkrarsız göstər.`, sol: `SELECT DISTINCT status FROM sifarisler;`, hint: `SELECT DISTINCT status ...` }
+],
+3: [
+ { q: `Qiyməti 50-dən az olan məhsulların <code>ad</code> və <code>qiymet</code> sütunlarını göstər.`, sol: `SELECT ad, qiymet FROM mehsullar WHERE qiymet < 50;`, hint: `Kiçikdir işarəsi: <` },
+ { q: `Bakıda <b>yaşamayan</b> müştərilərin <code>ad</code>, <code>soyad</code>, <code>seher</code> sütunlarını göstər.`, sol: `SELECT ad, soyad, seher FROM musteriler WHERE seher <> 'Bakı';`, hint: `«Bərabər deyil» üçün <> və ya != yaz.` },
+ { q: `Yaşı 25-dən kiçik <b>və ya</b> 45-dən böyük olan müştərilərin <code>ad</code> və <code>yas</code> sütunlarını göstər.`, sol: `SELECT ad, yas FROM musteriler WHERE yas < 25 OR yas > 45;`, hint: `İki şərti OR ilə birləşdir.` }
+],
+4: [
+ { q: `Adı <code>A</code> hərfi ilə başlayan müştərilərin <code>ad</code> və <code>soyad</code> sütunlarını göstər. <code>LIKE</code> istifadə et.`, sol: `SELECT ad, soyad FROM musteriler WHERE ad LIKE 'A%';`, hint: `Başlanğıc sabitdir, qalan hissə istənilən ola bilər: 'A%'.` },
+ { q: `Telefon nömrəsi olan və yaşı 30 ilə 40 arasında (hər ikisi daxil) olan müştərilərin <code>ad</code>, <code>yas</code>, <code>telefon</code> sütunlarını göstər.`, sol: `SELECT ad, yas, telefon FROM musteriler WHERE telefon IS NOT NULL AND yas BETWEEN 30 AND 40;`, hint: `IS NOT NULL və BETWEEN şərtlərini AND ilə birləşdir.` }
+],
+5: [
+ { q: `Ən gənc 5 müştərinin <code>ad</code> və <code>yas</code> sütunlarını göstər (ən gənc birinci).`, sol: `SELECT ad, yas FROM musteriler ORDER BY yas ASC LIMIT 5;`, ordered: true, hint: `Yaşa görə artan sırala və LIMIT 5 yaz.` },
+ { q: `Stokda olan (<code>stok</code> > 0) məhsulların <code>ad</code> və <code>stok</code> sütunlarını stoka görə azalan sırada göstər.`, sol: `SELECT ad, stok FROM mehsullar WHERE stok > 0 ORDER BY stok DESC;`, ordered: true, hint: `Əvvəl WHERE, sonra ORDER BY yazılır.` },
+ { q: `Qiymətə görə azalan sıralanmış məhsullardan <b>2-ci, 3-cü və 4-cü</b> ən bahalını göstər (<code>ad</code>, <code>qiymet</code>). <code>OFFSET</code> istifadə et.`, sol: `SELECT ad, qiymet FROM mehsullar ORDER BY qiymet DESC LIMIT 3 OFFSET 1;`, ordered: true, hint: `OFFSET 1 birinci sətri atlayır. LIMIT 3 ondan sonra 3 sətir götürür.` }
+],
+6: [
+ { q: `Telefon nömrəsi olan müştərilərin sayını tap (bir ədəd).`, sol: `SELECT COUNT(telefon) FROM musteriler;`, hint: `COUNT(telefon) NULL olanları saymır.` },
+ { q: `Bakıda yaşayan müştərilərin orta yaşını tap (bir ədəd).`, sol: `SELECT AVG(yas) FROM musteriler WHERE seher = 'Bakı';`, hint: `WHERE ilə Bakını süz, sonra AVG(yas) hesabla.` },
+ { q: `Məhsulların orta qiymətini 2 onluq rəqəmə qədər yuvarlaqlaşdırıb göstər (bir ədəd).`, sol: `SELECT ROUND(AVG(qiymet), 2) FROM mehsullar;`, hint: `ROUND(AVG(qiymet), 2)` }
+],
+7: [
+ { q: `Hər statusda neçə sifariş olduğunu göstər. İki sütun: <code>status</code> və <code>say</code>.`, sol: `SELECT status, COUNT(*) AS say FROM sifarisler GROUP BY status;`, hint: `GROUP BY status` },
+ { q: `Hər kateqoriya üzrə məhsul sayını və ümumi stoku göstər. Üç sütun: <code>kateqoriya</code>, məhsul sayı, <code>stok</code>-ların cəmi.`, sol: `SELECT kateqoriya, COUNT(*), SUM(stok) FROM mehsullar GROUP BY kateqoriya;`, hint: `Bir sorğuda bir neçə aqreqat funksiya yaza bilərsən: COUNT(*), SUM(stok).` },
+ { q: `Orta qiyməti 100-dən çox olan kateqoriyaları göstər. İki sütun: <code>kateqoriya</code> və orta qiymət.`, sol: `SELECT kateqoriya, AVG(qiymet) FROM mehsullar GROUP BY kateqoriya HAVING AVG(qiymet) > 100;`, hint: `HAVING AVG(qiymet) > 100` }
+],
+8: [
+ { q: `<code>shobeler</code> cədvəlinə <b>bir əmrlə</b> iki yeni şöbə əlavə et: (5, 'Hüquq') və (6, 'Logistika').`, sol: `INSERT INTO shobeler (id, ad) VALUES (5, 'Hüquq'), (6, 'Logistika');`, verify: `SELECT * FROM shobeler ORDER BY id`, hint: `VALUES-dan sonra bir neçə mötərizəni vergüllə ayır: (...), (...)` },
+ { q: `Stoku 10-dan az olan məhsulların <code>stok</code> dəyərini 20 et.`, sol: `UPDATE mehsullar SET stok = 20 WHERE stok < 10;`, verify: `SELECT * FROM mehsullar ORDER BY id`, hint: `UPDATE ... SET stok = 20 WHERE stok < 10;` },
+ { q: `Ləğv olunmuş (<code>legv_edildi</code>) sifarişləri <code>sifarisler</code> cədvəlindən sil.`, sol: `DELETE FROM sifarisler WHERE status = 'legv_edildi';`, verify: `SELECT * FROM sifarisler ORDER BY id`, hint: `DELETE FROM sifarisler WHERE status = '...';` }
+],
+9: [
+ { q: `Müştərilərin tam adını (<code>ad</code> + boşluq + <code>soyad</code>) göstər (bir sütun).`, sol: `SELECT ad || ' ' || soyad AS tam_ad FROM musteriler;`, hint: `|| mətnləri birləşdirir. Boşluğu da dırnaqda yaz: ' '` },
+ { q: `İşçilərin <code>ad</code>, <code>maas</code> və maaş qrupunu göstər (üç sütun). Maaş 3000-dən azdırsa <code>'asagi'</code>, 3000 ilə 5000 arasındadırsa (5000 daxil) <code>'orta'</code>, 5000-dən çoxdursa <code>'yuksek'</code>.`, sol: `SELECT ad, maas, CASE WHEN maas < 3000 THEN 'asagi' WHEN maas <= 5000 THEN 'orta' ELSE 'yuksek' END AS qrup FROM isciler;`, hint: `CASE WHEN maas < 3000 THEN ... WHEN ... ELSE ... END` }
+],
+10: [
+ { q: `Hər işçinin <code>ad</code>ını və şöbəsinin adını göstər (iki sütun).`, sol: `SELECT i.ad, s.ad FROM isciler i JOIN shobeler s ON s.id = i.shobe_id;`, hint: `isciler.shobe_id = shobeler.id üzrə birləşdir.` },
+ { q: `Bakıda yaşayan müştərilərin sifarişlərini göstər: sifarişin <code>id</code>, müştərinin <code>ad</code>ı və sifarişin <code>tarix</code>i (üç sütun).`, sol: `SELECT s.id, m.ad, s.tarix FROM sifarisler s JOIN musteriler m ON m.id = s.musteri_id WHERE m.seher = 'Bakı';`, hint: `JOIN et, sonra WHERE m.seher = 'Bakı' yaz.` },
+ { q: `Hər şöbədəki işçi sayını göstər: şöbənin adı və işçi sayı (iki sütun).`, sol: `SELECT sh.ad, COUNT(*) AS say FROM shobeler sh JOIN isciler i ON i.shobe_id = sh.id GROUP BY sh.id, sh.ad;`, hint: `JOIN + GROUP BY sh.id, sonra COUNT(*).` }
+],
+11: [
+ { q: `Hər məhsulun adını və satılan ümumi miqdarı göstər (iki sütun). Satılmayan məhsulda 0 çıxsın. <code>LEFT JOIN</code> və <code>COALESCE</code> istifadə et.`, sol: `SELECT p.ad, COALESCE(SUM(d.say), 0) FROM mehsullar p LEFT JOIN sifaris_detallari d ON d.mehsul_id = p.id GROUP BY p.id, p.ad;`, hint: `mehsullar-ı sifaris_detallari ilə LEFT JOIN et, SUM(d.say) hesabla və COALESCE ilə NULL-u 0 et.` },
+ { q: `Hər müştərinin <code>ad</code>ını və ən son sifarişinin tarixini göstər (iki sütun). Sifarişi olmayanlarda NULL olsun.`, sol: `SELECT m.ad, MAX(s.tarix) FROM musteriler m LEFT JOIN sifarisler s ON s.musteri_id = m.id GROUP BY m.id, m.ad;`, hint: `LEFT JOIN + GROUP BY m.id + MAX(s.tarix)` }
+],
+12: [
+ { q: `Ən çox <code>stok</code>u olan məhsulun <code>ad</code> və <code>stok</code> sütunlarını göstər. Alt sorğu ilə MAX(stok)-u tap.`, sol: `SELECT ad, stok FROM mehsullar WHERE stok = (SELECT MAX(stok) FROM mehsullar);`, hint: `WHERE stok = ( SELECT MAX(stok) FROM mehsullar )` },
+ { q: `Heç sifariş verməyən müştərilərin <code>ad</code> və <code>soyad</code> sütunlarını <code>NOT IN</code> ilə göstər.`, sol: `SELECT ad, soyad FROM musteriler WHERE id NOT IN (SELECT musteri_id FROM sifarisler);`, hint: `WHERE id NOT IN (SELECT musteri_id FROM sifarisler)` },
+ { q: `Statusu <code>hazirlanir</code> olan sifarişi olan müştərilərin <code>ad</code>ını göstər. <code>EXISTS</code> istifadə et.`, sol: `SELECT m.ad FROM musteriler m WHERE EXISTS (SELECT 1 FROM sifarisler s WHERE s.musteri_id = m.id AND s.status = 'hazirlanir');`, hint: `Alt sorğuda s.musteri_id = m.id şərti ilə həmin müştərinin sifarişlərini yoxla.` }
+],
+13: [
+ { q: `Menecerinin olduğu hər işçi üçün <code>ad</code>, <code>maas</code> və menecerinin maaşını göstər (üç sütun). Meneceri olmayanlar lazım deyil.`, sol: `SELECT e.ad, e.maas, m.maas FROM isciler e JOIN isciler m ON e.menecer_id = m.id;`, hint: `Cədvəli iki alias ilə INNER JOIN et: ON e.menecer_id = m.id` },
+ { q: `Ən bahalı və ən ucuz məhsulun <code>ad</code> və <code>qiymet</code> sütunlarını bir siyahıda göstər (iki sətir).`, sol: `SELECT ad, qiymet FROM mehsullar WHERE qiymet = (SELECT MAX(qiymet) FROM mehsullar) UNION ALL SELECT ad, qiymet FROM mehsullar WHERE qiymet = (SELECT MIN(qiymet) FROM mehsullar);`, hint: `İki ayrı SELECT yaz (biri MAX, biri MIN qiymət üçün) və UNION ALL ilə birləşdir.` },
+ { q: `Eyni şöbədə işləyən işçi cütlərini göstər: birinci işçinin adı, ikincinin adı, <code>shobe_id</code> (üç sütun). Hər cüt yalnız bir dəfə çıxsın (<code>a.id &lt; b.id</code>).`, sol: `SELECT a.ad, b.ad, a.shobe_id FROM isciler a JOIN isciler b ON a.shobe_id = b.shobe_id AND a.id < b.id;`, hint: `Self JOIN: ON a.shobe_id = b.shobe_id AND a.id < b.id` }
+],
+14: [
+ { q: `CTE ilə hər müştərinin sifariş sayını hesabla, sonra sifariş sayı 2-dən çox olan müştərilərin <code>ad</code> və sifariş sayını göstər (iki sütun).`, sol: `WITH t AS (SELECT musteri_id, COUNT(*) AS say FROM sifarisler GROUP BY musteri_id) SELECT m.ad, t.say FROM musteriler m JOIN t ON t.musteri_id = m.id WHERE t.say > 2;`, hint: `CTE-də sifarisler-i musteri_id üzrə qrupla, xaricdə musteriler ilə JOIN et.` },
+ { q: `Rekursiv CTE ilə 1-dən 10-a qədər ədədləri və onların kvadratlarını göstər (iki sütun: <code>n</code> və <code>kvadrat</code>).`, sol: `WITH RECURSIVE s(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM s WHERE n < 10) SELECT n, n * n AS kvadrat FROM s;`, hint: `Başlanğıc: SELECT 1. Rekursiv hissə: n + 1, WHERE n < 10 ilə dayandır.` },
+ { q: `Məbləği bütün sifarişlərin orta məbləğindən çox olan sifarişləri göstər (<code>sifaris_id</code> və məbləğ). Məbləği bir CTE-də hesabla və onu iki yerdə istifadə et.`, sol: `WITH m AS (SELECT d.sifaris_id, SUM(d.say * p.qiymet) AS mebleg FROM sifaris_detallari d JOIN mehsullar p ON p.id = d.mehsul_id GROUP BY d.sifaris_id) SELECT sifaris_id, mebleg FROM m WHERE mebleg > (SELECT AVG(mebleg) FROM m);`, hint: `WHERE mebleg > (SELECT AVG(mebleg) FROM m) – alt sorğu da CTE-yə müraciət edə bilər.` }
+],
+15: [
+ { q: `İşçiləri maaşa görə azalan sırada <code>DENSE_RANK()</code> ilə yerləşdir (bütün şirkət üzrə): <code>ad</code>, <code>maas</code>, <code>yer</code> (üç sütun).`, sol: `SELECT ad, maas, DENSE_RANK() OVER (ORDER BY maas DESC) AS yer FROM isciler;`, hint: `DENSE_RANK() OVER (ORDER BY maas DESC)` },
+ { q: `İşçiləri işə başlama tarixinə görə düz və maaşların yığılan cəmini göstər: <code>ad</code>, <code>ise_baslama</code>, <code>maas</code>, yığılan cəm (dörd sütun).`, sol: `SELECT ad, ise_baslama, maas, SUM(maas) OVER (ORDER BY ise_baslama) AS yigilan FROM isciler;`, hint: `SUM(maas) OVER (ORDER BY ise_baslama)` }
+],
+16: [
+ { q: `<code>kuponlar</code> cədvəli yarat: <code>id</code> (INTEGER, PRIMARY KEY), <code>kod</code> (TEXT, NOT NULL, UNIQUE), <code>endirim</code> (REAL, DEFAULT 0). Sütunları bu ardıcıllıqla yaz.`, sol: `CREATE TABLE kuponlar (id INTEGER PRIMARY KEY, kod TEXT NOT NULL UNIQUE, endirim REAL DEFAULT 0);`, verify: `SELECT name, type, "notnull", dflt_value, pk FROM pragma_table_info('kuponlar') ORDER BY cid`, hint: `kod TEXT NOT NULL UNIQUE, endirim REAL DEFAULT 0` },
+ { q: `<code>musteriler</code> cədvəlinə <code>bal</code> adlı yeni sütun əlavə et: tipi INTEGER, susmaya görə dəyəri 0. <code>ALTER TABLE</code> istifadə et.`, sol: `ALTER TABLE musteriler ADD COLUMN bal INTEGER DEFAULT 0;`, verify: `SELECT id, ad, bal FROM musteriler ORDER BY id`, hint: `ALTER TABLE cədvəl ADD COLUMN ad TİP DEFAULT dəyər;` },
+ { q: `<code>sifaris_meblegleri</code> adlı view yarat: sifarişin <code>id</code>-si (<code>sifaris_id</code>), müştərinin <code>ad</code>ı (<code>musteri</code>) və sifarişin məbləği (<code>mebleg</code> = <code>say</code> × <code>qiymet</code>-in cəmi). Üç sütun.`, sol: `CREATE VIEW sifaris_meblegleri AS SELECT s.id AS sifaris_id, m.ad AS musteri, SUM(d.say * p.qiymet) AS mebleg FROM sifarisler s JOIN musteriler m ON m.id = s.musteri_id JOIN sifaris_detallari d ON d.sifaris_id = s.id JOIN mehsullar p ON p.id = d.mehsul_id GROUP BY s.id, m.ad;`, verify: `SELECT * FROM sifaris_meblegleri ORDER BY sifaris_id`, hint: `Əvvəl SELECT sorğusunu yaz və işə sal, işləyəndə qarşısına CREATE VIEW ad AS əlavə et.` }
+],
+17: [
+ { q: `Hər məhsul kateqoriyası üzrə ümumi satış məbləğini tap (ləğv olunmayan sifarişlər). İki sütun: <code>kateqoriya</code> və məbləğ. Məbləğə görə azalan sırala.`, sol: `SELECT p.kateqoriya, SUM(d.say * p.qiymet) AS cem FROM sifaris_detallari d JOIN sifarisler s ON s.id = d.sifaris_id JOIN mehsullar p ON p.id = d.mehsul_id WHERE s.status <> 'legv_edildi' GROUP BY p.kateqoriya ORDER BY cem DESC;`, ordered: true, hint: `sifaris_detallari, sifarisler (status üçün) və mehsullar cədvəllərini JOIN et.` },
+ { q: `Ən azı 3 sifarişi olan müştərilərin <code>ad</code>ını, ilk sifariş tarixini, son sifariş tarixini və sifariş sayını göstər (dörd sütun).`, sol: `SELECT m.ad, MIN(s.tarix), MAX(s.tarix), COUNT(*) FROM musteriler m JOIN sifarisler s ON s.musteri_id = m.id GROUP BY m.id, m.ad HAVING COUNT(*) >= 3;`, hint: `JOIN + GROUP BY m.id + HAVING COUNT(*) >= 3` }
+]
+};
+for (const k in MORE) LESSONS[k - 1].tasks.push(...MORE[k]);
+LESSONS.forEach((L, i) => { L.id = i + 1; L.tasks.forEach((t, j) => { t.id = L.id + '-' + (j + 1); }); });
+const TOTAL = LESSONS.reduce((a, L) => a + L.tasks.length, 0);
+
+/* ---------- vəziyyət ---------- */
+let done = store.get('sqlm.done', {});
+let drafts = store.get('sqlm.drafts', {});
+const attempts = {}, lastCheck = {}, convo = {};
+let sample = null;
+
+function taskById(id) {
+  const [a, b] = id.split('-').map(Number);
+  const L = LESSONS[a - 1]; return { L, t: L.tasks[b - 1] };
+}
+
+/* ---------- yoxlama məntiqi ---------- */
+const norm = v => v === null ? 'N:' : typeof v === 'number' ? 'n:' + (Math.round(v * 1e4) / 1e4) : 's:' + String(v);
+function fmtNum(v) { return Number.isInteger(v) ? String(v) : String(Math.round(v * 1e6) / 1e6); }
+
+function checkTask(task, sql) {
+  let dbU;
+  try { dbU = freshDb(); } catch (e) { return { pass: false, kind: 'error', error: String(e.message || e) }; }
+  const u = execAll(dbU, sql);
+  if (!u.ok) return { pass: false, kind: 'error', error: u.error };
+  const dbS = freshDb(); const s = execAll(dbS, task.sol);
+  let got, exp, shown;
+  if (task.verify) {
+    got = execAll(dbU, task.verify).res; exp = execAll(dbS, task.verify).res; shown = got;
+  } else { got = u.res; exp = s.res; shown = got; }
+  const E = exp || { columns: [], values: [] };
+  const G = got || { columns: [], values: [] };
+  const fail = (kind, msg) => ({ pass: false, kind, msg, shown, userRes: u.res, rowsGot: G.values.length });
+  if (task.verify) {
+    const a = G.values.map(r => r.map(norm).join('|')), b = E.values.map(r => r.map(norm).join('|'));
+    const same = a.length === b.length && a.every((x, i) => x === b[i]);
+    if (same) return { pass: true, shown, userRes: u.res };
+    if (a.length !== b.length) return fail('rows', `Əmri icra etdikdən sonra cədvəldə ${E.values.length} sətir olmalıdır, səndə ${G.values.length} sətir var.`);
+    return fail('values', 'Əmri icra etdikdən sonra cədvəlin məzmunu gözlənilən kimi deyil. Dəyərləri və WHERE şərtini yoxla.');
+  }
+  if (!got && E.values.length > 0) return fail('noresult', 'Sorğun nəticə cədvəli qaytarmadı. Bu tapşırıqda SELECT sorğusu yazmalısan.');
+  if (G.columns.length && G.columns.length !== E.columns.length)
+    return fail('cols', `Nəticədə ${E.columns.length} sütun olmalıdır, səndə isə ${G.columns.length} sütun var.`);
+  if (G.values.length !== E.values.length)
+    return fail('rows', G.values.length > E.values.length
+      ? `Nəticədə ${E.values.length} sətir olmalıdır, səndə ${G.values.length} sətir var. Çox sətir gəlir, şərti sərtləşdirməyi (WHERE/HAVING) yoxla.`
+      : `Nəticədə ${E.values.length} sətir olmalıdır, səndə ${G.values.length} sətir var. Az sətir gəlir, şərt çox sərt ola bilər.`);
+  if (task.names) {
+    const a = G.columns.map(c => c.toLowerCase()), b = E.columns.map(c => c.toLowerCase());
+    if (a.join() !== b.join()) return fail('names', `Sütun adları fərqlidir. Gözlənilən: ${E.columns.join(', ')}. Sənin: ${G.columns.join(', ')}.`);
+  }
+  const a = G.values.map(r => r.map(norm).join('|')), b = E.values.map(r => r.map(norm).join('|'));
+  if (task.ordered) {
+    if (a.every((x, i) => x === b[i])) return { pass: true, shown, userRes: u.res };
+    const sa = [...a].sort(), sb = [...b].sort();
+    if (sa.every((x, i) => x === sb[i])) return fail('order', 'Sətirlər düzgündür, amma sıralama fərqlidir. ORDER BY hissəsini və ASC/DESC-i yoxla.');
+    return fail('values', 'Sətirlərin sayı düzgündür, amma dəyərlər fərqlidir. Sütunları, şərti və sıralamanı yoxla.');
+  }
+  const sa = [...a].sort(), sb = [...b].sort();
+  if (sa.every((x, i) => x === sb[i])) return { pass: true, shown, userRes: u.res };
+  return fail('values', 'Sətirlərin sayı düzgündür, amma dəyərlər fərqlidir. Sütunların ardıcıllığını, şərti və funksiyaları yoxla.');
+}
+
+function azError(m) {
+  let x;
+  if ((x = m.match(/no such table: (.+)/))) return `«${x[1]}» adlı cədvəl tapılmadı. Cədvəlin adını sxemdən yoxla, yazılışda səhv ola bilər.`;
+  if ((x = m.match(/no such column: (.+)/))) return `«${x[1]}» adlı sütun tapılmadı. Sütun adını yoxla. Mətn dəyərini isə tək dırnaq içində yaz: 'mətn'.`;
+  if ((x = m.match(/near "(.*)": syntax error/))) return `«${x[1]}» sözünün yanında sintaksis xətası var. Vergülləri, mötərizələri və açar sözlərin yazılışını, həmçinin sözlərin sırasını yoxla.`;
+  if (/incomplete input/.test(m)) return 'Sorğu yarımçıq qalıb. Bağlanmamış mötərizə və ya dırnaq ola bilər.';
+  if (/unrecognized token/.test(m)) return 'Tanınmayan simvol var. Mətn üçün düz tək dırnaq \' istifadə et, ikiqat və ya əyri dırnaq yox.';
+  if ((x = m.match(/ambiguous column name: (.+)/))) return `«${x[1]}» sütunu bir neçə cədvəldə var, hansının lazım olduğu bəlli deyil. Cədvəl alias-ı ilə yaz, məsələn m.${x[1].split('.').pop()}.`;
+  if (/misuse of aggregate/.test(m)) return 'Aqreqat funksiyanı (COUNT, SUM, AVG...) WHERE-də işlətmək olmaz. Qrupları süzmək üçün HAVING yaz.';
+  if (/UNIQUE constraint failed/.test(m)) return 'Bu dəyər artıq mövcuddur, təkrar yazmaq olmaz (UNIQUE / PRIMARY KEY pozulub).';
+  if (/NOT NULL constraint failed/.test(m)) return 'Boş buraxıla bilməyən sütuna dəyər verilməyib.';
+  if (/CHECK constraint failed/.test(m)) return 'Verdiyin dəyər CHECK şərtini pozur.';
+  if (/has no column named/.test(m)) return 'Cədvəldə belə sütun yoxdur. INSERT-də sütun adlarını yoxla.';
+  if (/values for \d+ columns|values were supplied|columns but \d+ values/.test(m)) return 'Sütunların sayı ilə VALUES-dakı dəyərlərin sayı eyni deyil.';
+  if (/already exists/.test(m)) return 'Bu adlı obyekt (cədvəl, view və ya indeks) artıq mövcuddur.';
+  if (/ORDER BY term|GROUP BY term/.test(m)) return 'ORDER BY/GROUP BY-dakı ifadə nəticədəki sütunlara uyğun gəlmir.';
+  if (/wrong number of arguments|no such function/.test(m)) return 'Funksiyanın adı və ya arqumentlərin sayı səhvdir.';
+  return 'Sorğuda xəta var. Aşağıdakı texniki mesaja və sorğunun yazılışına diqqətlə bax.';
+}
+
+/* ---------- görünüş: cədvəl, mesajlar ---------- */
+function tableHtml(res, limit = 100) {
+  if (!res) return '';
+  let h = '<div class="tbl-wrap"><table class="grid"><thead><tr><th class="rn">#</th>' + res.columns.map(c => '<th>' + esc(c) + '</th>').join('') + '</tr></thead><tbody>';
+  res.values.slice(0, limit).forEach((r, i) => {
+    h += '<tr><td class="rn">' + (i + 1) + '</td>' + r.map(v => v === null ? '<td class="null">NULL</td>' : typeof v === 'number' ? '<td class="num">' + fmtNum(v) + '</td>' : '<td>' + esc(v) + '</td>').join('') + '</tr>';
+  });
+  h += '</tbody></table></div><div class="rcount">' + res.values.length + ' sətir' + (res.values.length > limit ? ' (ilk ' + limit + ' göstərilir)' : '') + '</div>';
+  return h;
+}
+const fb = (cls, title, body, raw) => `<div class="fb ${cls}"><strong>${title}</strong>${body ? '<div>' + body + '</div>' : ''}${raw ? '<code class="raw">' + esc(raw) + '</code>' : ''}</div>`;
+function runResultHtml(sql, r) {
+  if (!r.ok) return fb('err', 'Xəta', esc(azError(r.error)), r.error);
+  if (r.res) return tableHtml(r.res);
+  if (/^\s*(select|with|pragma|explain)/i.test(sql)) return fb('info', 'Sorğu heç bir sətir qaytarmadı.', '');
+  return fb('info', 'Əmr uğurla icra olundu.', /insert|update|delete/i.test(sql) ? `Dəyişən sətir sayı: ${r.changes}.` : '');
+}
+function notReady() { return fb('info', 'SQL mühərriki hələ yüklənir…', 'Bir neçə saniyə sonra yenidən yoxla.'); }
+
+/* ---------- sxem paneli ---------- */
+function schemaHtml(open) {
+  return `<details class="schema" ${open ? 'open' : ''}><summary>Cədvəllərin sxemi</summary>
+  <div class="sch-grid">${SCHEMA.map(s => `<div class="tbl"><button type="button" data-act="peek" data-t="${s.t}">${s.t}<small>${s.d} ▾</small></button>
+  <ul>${s.c.map(c => `<li><b>${c[2] === 'pk' ? 'PK' : c[2] === 'fk' ? 'FK' : ''}</b>${c[0]}<span>${c[1]}</span></li>`).join('')}</ul></div>`).join('')}
+  <div class="sch-prev"></div></div>
+  <div class="sch-notes">PK – əsas açar, FK – başqa cədvələ istinad. Cədvəlin adına basaraq ilk 5 sətrə baxa bilərsən.<br>
+  <code>kateqoriya</code>: Elektronika, Kitab, Ev, Sport. <code>status</code>: hazirlanir, gonderildi, catdirildi, legv_edildi.</div></details>`;
+}
+
+/* ---------- səhifələr ---------- */
+const main = $('#main');
+function meter(n) { return '<span class="meter">' + [0, 1, 2, 3].map(i => '<i class="' + (i <= n ? 'on' : '') + '"></i>').join('') + '</span>'; }
+function doneCount(L) { return L.tasks.filter(t => done[t.id]).length; }
+
+function buildSide(cur) {
+  let h = '', lv = -1;
+  LESSONS.forEach(L => {
+    if (L.lvl !== lv) { lv = L.lvl; h += `<div class="lv">${meter(lv)} ${LEVELS[lv]}</div>`; }
+    const dc = doneCount(L);
+    h += `<a href="#movzu-${L.id}" class="${cur === 'm' + L.id ? 'cur' : ''} ${dc === L.tasks.length ? 'full' : ''}"><span class="no">${L.id}</span><span>${L.title.split(':')[0]}</span><span class="st">${dc === L.tasks.length ? '✓' : dc + '/' + L.tasks.length}</span></a>`;
+  });
+  h += `<div class="lv" style="margin-top:22px">Sərbəst</div><a href="#sinaq" class="${cur === 'play' ? 'cur' : ''}"><span class="no">▶</span><span>Sınaq meydançası</span></a>`;
+  $('#side').innerHTML = h;
+}
+function updateProgress() {
+  const n = Object.keys(done).filter(k => { try { return taskById(k).t; } catch (e) { return false; } }).length;
+  $('#progText').textContent = n + ' / ' + TOTAL + ' tapşırıq';
+  $('#progBar').style.width = (n / TOTAL * 100) + '%';
+}
+let curKey = '';
+function refreshSide() { buildSide(curKey); updateProgress(); }
+
+function showHome() {
+  curKey = 'home'; refreshSide();
+  const next = LESSONS.find(L => doneCount(L) < L.tasks.length) || LESSONS[0];
+  const started = Object.keys(done).length > 0;
+  main.innerHTML = `<div class="hero">
+    <h1>SQL-i sıfırdan professional səviyyəyə qədər öyrən</h1>
+    <p class="lead">${LESSONS.length} mövzu, ${TOTAL} tapşırıq. Hər mövzuda qısa izah, sonra isə özün sorğu yazıb yoxladığın tapşırıqlar var. Sorğular birbaşa brauzerdə real SQL mühərriki ilə işləyir.</p>
+    <p><a class="btn pri" href="#movzu-${next.id}" style="text-decoration:none">${started ? 'Davam et: ' + next.title.split(':')[0] : 'Başla'}</a></p>
+    <div class="steps">
+      <div><b>1. Oxu</b>Hər mövzunun izahı nümunələrlə gəlir. «Nəticəni gör» ilə nümunəni dərhal işlədə bilərsən.</div>
+      <div><b>2. Yaz</b>Tapşırığı redaktorda həll et, <b>İşə sal</b> ilə sına, sonra <b>Yoxla</b> düyməsinə bas.</div>
+      <div><b>3. Səhvdən öyrən</b>Yoxlama səhvi Azərbaycan dilində izah edir. İlişsən, AI müəllim sənin sorğuna baxıb istiqamət verir.</div>
+    </div>
+    <h2>Kursun planı</h2>
+    <div class="lvls">${LEVELS.map((nm, i) => `<div class="lvl"><h3>${meter(i)} ${nm}</h3>${LESSONS.filter(L => L.lvl === i).map(L => `<a href="#movzu-${L.id}"><span>${L.id}</span>${L.title.split(':')[0]}</a>`).join('')}</div>`).join('')}</div>
+  </div>`;
+  window.scrollTo(0, 0);
+}
+
+function taskHtml(L, t, i) {
+  return `<section class="task ${done[t.id] ? 'is-done' : ''}" id="task-${t.id}" data-task="${t.id}">
+  <div class="task-head">Tapşırıq ${i + 1}<span class="badge">✓ Həll olunub</span></div>
+  <p class="task-text">${t.q}</p>
+  <textarea class="editor" id="ed-${t.id}" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="SQL redaktoru" placeholder="-- Sorğunu bura yaz"></textarea>
+  <div class="actions">
+    <button class="btn" type="button" data-act="run">İşə sal ▶</button>
+    <button class="btn pri" type="button" data-act="check">Yoxla</button>
+    <button class="btn ghost" type="button" data-act="hint">İpucu</button>
+    <button class="btn ghost" type="button" data-act="sol">Həlli göstər</button>
+    <button class="btn ghost" type="button" data-act="ai" data-ai>AI-dan kömək</button>
+    <span class="kbd">Ctrl + Enter – işə sal</span>
+  </div>
+  <div class="hint" hidden></div>
+  <div class="out" id="out-${t.id}"></div>
+  <div class="sol" id="sol-${t.id}"></div>
+  ${aiBox('task', t.id)}
+</section>`;
+}
+function aiBox(kind, key, ph) {
+  return `<div class="ai-box" data-kind="${kind}" data-key="${key}" hidden><div class="ai-head">AI müəllim</div><div class="ai-log"></div>
+  <form class="ai-form"><input type="text" placeholder="${ph || 'Əlavə sual yaz…'}" aria-label="AI müəllimə sual"><button class="btn mini" type="submit">Göndər</button></form></div>`;
+}
+
+function showLesson(n) {
+  const L = LESSONS[n - 1]; if (!L) return showHome();
+  curKey = 'm' + n; refreshSide();
+  const prev = LESSONS[n - 2], next = LESSONS[n];
+  main.innerHTML = `<article class="lesson">
+    <div class="crumb">${meter(L.lvl)} ${LEVELS[L.lvl]} · Mövzu ${L.id} / ${LESSONS.length}</div>
+    <h1>${L.title}</h1>
+    <div class="theory">${L.theory}</div>
+    ${schemaHtml(n <= 2)}
+    <h2 class="tasks-h">Tapşırıqlar</h2>
+    ${L.tasks.map((t, i) => taskHtml(L, t, i)).join('')}
+    <div class="lesson-ask aionly"><h3>Bu mövzuda sualın var?</h3><div style="font-size:.9rem;color:var(--ink-2)">AI müəllimdən istədiyin şeyi soruş.</div>${aiBox('lesson', 'L' + n, 'Məsələn: LEFT JOIN ilə INNER JOIN arasındakı fərq nədir?')}
+      <div class="actions"><button class="btn" type="button" data-act="lesson-ask">Sual ver</button></div></div>
+    <nav class="pager">${prev ? `<a class="btn" href="#movzu-${prev.id}">← ${prev.title.split(':')[0]}</a>` : '<span></span>'}${next ? `<a class="btn pri" href="#movzu-${next.id}">${next.title.split(':')[0]} →</a>` : `<a class="btn pri" href="#sinaq">Sınaq meydançası →</a>`}</nav>
+  </article>`;
+  L.tasks.forEach(t => { const ta = $('#ed-' + t.id); if (drafts[t.id]) ta.value = drafts[t.id]; autosize(ta); });
+  window.scrollTo(0, 0);
+}
+function autosize(ta) { ta.style.height = 'auto'; ta.style.height = Math.max(96, Math.min(ta.scrollHeight + 4, 420)) + 'px'; }
+
+let playLast = null;
+function showPlay() {
+  curKey = 'play'; refreshSide();
+  main.innerHTML = `<div class="crumb">Sərbəst məşq</div><h1>Sınaq meydançası</h1>
+  <p class="lead">İstədiyin sorğunu yaz və sına. Bu bölmədə verilənlər bazası sən sıfırlayana qədər saxlanılır, yəni INSERT, UPDATE, DELETE və CREATE nəticələri qalır.</p>
+  ${schemaHtml(true)}
+  <textarea class="editor play-ed" id="ed-play" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="SQL redaktoru" placeholder="-- Sorğunu bura yaz">${esc(drafts.play || 'SELECT * FROM musteriler;')}</textarea>
+  <div class="actions"><button class="btn pri" type="button" data-act="play-run">İşə sal ▶</button><button class="btn" type="button" data-act="play-reset">Bazanı sıfırla</button><button class="btn ghost" type="button" data-act="play-ai" data-ai>AI-dan kömək</button><span class="kbd">Ctrl + Enter – işə sal</span></div>
+  <div class="out" id="out-play"></div>${aiBox('play', 'play', 'Əlavə sual yaz…')}`;
+  autosize($('#ed-play')); window.scrollTo(0, 0);
+}
+
+/* ---------- AI müəllim ---------- */
+const SYS = `Sən təcrübəli SQL müəllimisən. Şagird Azərbaycanlıdır və ingilis dili səviyyəsi başlanğıcdır, ona görə cavabı sadə, qısa Azərbaycan dilində yaz (SQL açar sözləri ingiliscə qalır).
+Qaydalar:
+- Şagirdin özü həll etməsinə kömək et. Tam düzgün sorğunu yazma. Səhvin harada olduğunu göstər, nəyi dəyişməli olduğunu izah et, lazım olsa başqa cədvəllə 1-2 sətirlik kiçik nümunə ver.
+- Şagirdin 3 və daha çox uğursuz cəhdi varsa, daha konkret ol və səhv hissənin düzəlişini göstərə bilərsən.
+- Sorğu düzgündürsə, qısa təbrik et və istəsən bir sadələşdirmə və ya daha yaxşı yazılış məsləhəti ver.
+- Maksimum 120 söz. Formatlama: **qalın** və \`kod\` istifadə edə bilərsən. Başlıq istifadə etmə.`;
+
+function md(t) {
+  let s = esc(t);
+  s = s.replace(/```(?:sql)?\n?([\s\S]*?)```/g, (m, c) => '<pre>' + c.replace(/\n$/, '') + '</pre>');
+  s = s.replace(/`([^`\n]+)`/g, '<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/^[-*] /gm, '• ');
+  return s.replace(/\n/g, '<br>').replace(/<\/pre><br>/g, '</pre>').replace(/<br><pre>/g, '<pre>');
+}
+function aiError(e) {
+  const c = e && e.code;
+  if (c === 'not_granted') return 'AI müəllimdən istifadə üçün icazə verilməyib.';
+  if (c === 'rate_limited') return 'Çox tez-tez sorğu göndərildi. Bir az gözləyib yenidən yoxla.';
+  return 'AI cavab verə bilmədi. Bir az sonra yenidən yoxla.';
+}
+async function aiSend(box, firstContent, question) {
+  if (!sample) return;
+  const key = box.dataset.key, log = $('.ai-log', box);
+  box.hidden = false;
+  let msgs = convo[key];
+  if (!msgs) { msgs = convo[key] = [{ role: 'user', content: firstContent + (question ? '\n\nŞagirdin sualı: ' + question : '\n\nŞagird nəyin səhv olduğunu başa düşmək istəyir. Kömək et.') }]; }
+  else msgs.push({ role: 'user', content: question });
+  if (question) { const me = document.createElement('div'); me.className = 'ai-msg me'; me.textContent = question; log.appendChild(me); }
+  const bot = document.createElement('div'); bot.className = 'ai-msg'; bot.innerHTML = '<span class="dots">AI düşünür</span>'; log.appendChild(bot);
+  const btns = box.querySelectorAll('button'); btns.forEach(b => b.disabled = true);
+  try {
+    const r = await sample(msgs, { modelTier: 'quick', cache: false, signal: new AbortController().signal, onText: ({ text }) => { bot.innerHTML = md(text); } });
+    bot.innerHTML = md(r.text); msgs.push({ role: 'assistant', content: r.text });
+  } catch (e) { bot.innerHTML = '<span style="color:var(--err)">' + esc(aiError(e)) + '</span>'; msgs.pop(); if (!msgs.length) convo[key] = null; }
+  btns.forEach(b => b.disabled = false);
+}
+function taskContext(id, sql, r) {
+  const { L, t } = taskById(id);
+  let res;
+  if (r.pass) res = 'Sorğu düzgündür.';
+  else if (r.kind === 'error') res = 'SQL xətası: ' + r.error;
+  else res = r.msg + (r.userRes ? ' Şagirdin nəticəsinin ilk sətirləri: ' + JSON.stringify({ sutunlar: r.userRes.columns, setirler: r.userRes.values.slice(0, 5) }) : '');
+  return `Verilənlər bazası (SQLite):\n${SCHEMA_TXT}\n\nMövzu: ${L.title.replace(/<[^>]+>/g, '')}\nTapşırıq: ${t.q.replace(/<[^>]+>/g, '')}\nGizli düzgün həll (şagirdə olduğu kimi göstərmə): ${t.sol}\n\nŞagirdin sorğusu:\n${sql}\n\nYoxlama nəticəsi: ${res}\nUğursuz cəhdlərin sayı: ${attempts[id] || 0}`;
+}
+
+/* ---------- hadisələr ---------- */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const act = b.dataset.act, card = b.closest('.task'), id = card && card.dataset.task;
+  if (act === 'try') {
+    const out = b.parentElement.querySelector('.ex-out'); const sql = b.parentElement.querySelector('pre').textContent;
+    if (!SQL) { out.innerHTML = notReady(); return; }
+    out.innerHTML = runResultHtml(sql, execAll(freshDb(), sql)); return;
+  }
+  if (act === 'peek') {
+    const prev = b.closest('.sch-grid').querySelector('.sch-prev'); if (!SQL) { prev.innerHTML = notReady(); return; }
+    const r = execAll(freshDb(), 'SELECT * FROM ' + b.dataset.t + ' LIMIT 5'); prev.innerHTML = '<div class="rcount"><b>' + b.dataset.t + '</b> cədvəlinin ilk 5 sətri</div>' + tableHtml(r.res); return;
+  }
+  if (act === 'lesson-ask') { const box = b.closest('.lesson-ask').querySelector('.ai-box'); box.hidden = false; $('input', box).focus(); return; }
+  if (act === 'play-run') return playRun();
+  if (act === 'play-reset') { playDb = null; $('#out-play').innerHTML = fb('info', 'Verilənlər bazası ilkin vəziyyətinə qaytarıldı.', ''); return; }
+  if (act === 'play-ai') {
+    const box = $('.ai-box'); const sql = $('#ed-play').value.trim(); convo.play = null; $('.ai-log', box).innerHTML = '';
+    if (!sql) { box.hidden = false; $('.ai-log', box).innerHTML = '<div class="ai-msg">Əvvəlcə sorğu yaz, sonra mən baxım.</div>'; return; }
+    const r = playLast && playLast.sql === sql ? playLast.r : (SQL ? execAll(playDb || (playDb = freshDb()), sql) : { ok: false, error: 'mühərrik yüklənməyib' });
+    aiSend(box, `Verilənlər bazası (SQLite):\n${SCHEMA_TXT}\n\nŞagird sərbəst məşq edir.\nŞagirdin sorğusu:\n${sql}\n\nNəticə: ${r.ok ? (r.res ? 'Sorğu ' + r.res.values.length + ' sətir qaytardı.' : 'Sorğu işlədi.') : 'SQL xətası: ' + r.error}`, null); return;
+  }
+  if (!id) return;
+  const ta = $('#ed-' + id), out = $('#out-' + id), { L, t } = taskById(id);
+  if (act === 'hint') { const h = $('.hint', card); h.hidden = !h.hidden; h.innerHTML = '<b>İpucu:</b> ' + esc(t.hint); return; }
+  if (act === 'sol') {
+    const s = $('#sol-' + id);
+    if (!done[id] && (attempts[id] || 0) < 2) { s.innerHTML = fb('info', 'Bir az da özün cəhd et.', 'Həlli görməzdən əvvəl ən azı 2 dəfə <b>Yoxla</b> düyməsinə bas. İstəsən İpucu və ya AI-dan kömək al.'); return; }
+    s.innerHTML = '<div class="ex"><pre>' + hl(t.sol) + '</pre><button class="btn mini" type="button" data-act="copy-sol">Redaktora köçür</button></div>'; return;
+  }
+  if (act === 'copy-sol') { ta.value = t.sol; autosize(ta); drafts[id] = t.sol; store.set('sqlm.drafts', drafts); ta.focus(); return; }
+  const sql = ta.value.trim();
+  if (act === 'ai') {
+    const box = $('.ai-box', card); convo[id] = null; $('.ai-log', box).innerHTML = ''; box.hidden = false;
+    if (!sql) { $('.ai-log', box).innerHTML = '<div class="ai-msg">Əvvəlcə sorğunu redaktora yaz, sonra mən baxım.</div>'; return; }
+    if (!SQL) { $('.ai-log', box).innerHTML = '<div class="ai-msg">SQL mühərriki hələ yüklənir, bir neçə saniyə sonra yenidən yoxla.</div>'; return; }
+    aiSend(box, taskContext(id, sql, checkTask(t, sql)), null); return;
+  }
+  if (!sql) { out.innerHTML = fb('info', 'Redaktor boşdur.', 'Əvvəlcə sorğunu yaz.'); return; }
+  drafts[id] = ta.value; store.set('sqlm.drafts', drafts);
+  if (!SQL) { out.innerHTML = notReady(); return; }
+  if (act === 'run') { out.innerHTML = runResultHtml(sql, execAll(freshDb(), sql)); return; }
+  if (act === 'check') {
+    attempts[id] = (attempts[id] || 0) + 1;
+    const r = checkTask(t, sql); lastCheck[id] = r;
+    if (r.pass) {
+      done[id] = 1; store.set('sqlm.done', done); card.classList.add('is-done'); refreshSide();
+      const all = doneCount(L) === L.tasks.length;
+      out.innerHTML = fb('ok', 'Düzgündür! Tapşırıq həll olundu.', all ? 'Bu mövzunun bütün tapşırıqlarını tamamladın.' : '') + tableHtml(r.shown);
+    } else if (r.kind === 'error') {
+      out.innerHTML = fb('err', 'Sorğuda xəta var', esc(azError(r.error)), r.error);
+    } else {
+      out.innerHTML = fb('err', 'Hələ düzgün deyil', esc(r.msg) + '<br>İpucu və ya <b>AI-dan kömək</b> düyməsindən istifadə edə bilərsən.') + (r.shown ? '<div class="rcount">Sənin nəticən:</div>' + tableHtml(r.shown) : '');
+    }
+  }
+});
+function playRun() {
+  const sql = $('#ed-play').value.trim(), out = $('#out-play');
+  if (!sql) { out.innerHTML = fb('info', 'Redaktor boşdur.', ''); return; }
+  drafts.play = $('#ed-play').value; store.set('sqlm.drafts', drafts);
+  if (!SQL) { out.innerHTML = notReady(); return; }
+  if (!playDb) playDb = freshDb();
+  const r = execAll(playDb, sql); playLast = { sql, r }; out.innerHTML = runResultHtml(sql, r);
+}
+document.addEventListener('keydown', e => {
+  const ta = e.target; if (!ta.classList || !ta.classList.contains('editor')) return;
+  if (e.key === 'Tab') { e.preventDefault(); const s = ta.selectionStart; ta.setRangeText('  ', s, ta.selectionEnd, 'end'); }
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); const c = ta.closest('.task'); if (c) $('[data-act="run"]', c).click(); else playRun(); }
+});
+document.addEventListener('input', e => {
+  const ta = e.target; if (!ta.classList || !ta.classList.contains('editor')) return;
+  autosize(ta); const c = ta.closest('.task'); const k = c ? c.dataset.task : 'play'; drafts[k] = ta.value; store.set('sqlm.drafts', drafts);
+});
+document.addEventListener('submit', e => {
+  const form = e.target.closest('.ai-form'); if (!form) return; e.preventDefault();
+  const box = form.closest('.ai-box'), inp = $('input', form), q = inp.value.trim(); if (!q) return; inp.value = '';
+  const kind = box.dataset.kind, key = box.dataset.key; let first = '';
+  if (!convo[key]) {
+    if (kind === 'lesson') first = `Verilənlər bazası (SQLite):\n${SCHEMA_TXT}\n\nŞagird "${LESSONS[+key.slice(1) - 1].title}" mövzusunu öyrənir və sual verir.`;
+    else if (kind === 'play') first = `Verilənlər bazası (SQLite):\n${SCHEMA_TXT}\n\nŞagird sərbəst məşq edir.`;
+    else { const id = key, { t } = taskById(id), sql = $('#ed-' + id).value; first = `Verilənlər bazası (SQLite):\n${SCHEMA_TXT}\n\nTapşırıq: ${t.q.replace(/<[^>]+>/g, '')}\nGizli düzgün həll (göstərmə): ${t.sol}\nŞagirdin sorğusu:\n${sql}`; }
+  }
+  aiSend(box, first, q);
+});
+$('#menuBtn').addEventListener('click', () => document.body.classList.toggle('drawer'));
+$('#scrim').addEventListener('click', () => document.body.classList.remove('drawer'));
+$('#side').addEventListener('click', e => { if (e.target.closest('a')) document.body.classList.remove('drawer'); });
+
+/* ---------- marşrut ---------- */
+function route() {
+  document.body.classList.remove('drawer');
+  const h = location.hash.replace('#', ''), m = h.match(/^movzu-(\d+)$/);
+  if (h === 'sinaq') showPlay(); else if (m) showLesson(+m[1]); else showHome();
+}
+window.addEventListener('hashchange', route);
+route();
+
+/* ---------- mühərrik və AI-nın yüklənməsi ---------- */
+if (typeof initSqlJs === 'function') {
+  initSqlJs().then(S => { SQL = S; }).catch(() => { });
+}
+(async () => {
+  try { const c = window.claude; if (c && c.use) { sample = await c.use('sample'); if (sample) document.documentElement.classList.add('ai-on'); } } catch (e) { sample = null; }
+})();
+</script>
+
+</body></html>
